@@ -61,7 +61,6 @@ class MainMenuWidget extends StatelessWidget {
   }
 
   Widget actionChips(String text, Icon icon, String section, BuildContext context) {
-
     return ActionChip(
       elevation: 6.0,
       avatar: CircleAvatar(

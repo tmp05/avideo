@@ -37,8 +37,10 @@ class VideoListWidget extends StatelessWidget {
     else
       movieBloc = BlocProvider.of<MovieInfoBloc>(context);
 
+    final double size = MediaQuery.of(context).size.width/(MediaQuery.of(context).size.width/160.round());
+
     return Container(
-        height: 150,
+        height: size,
         child: StreamBuilder<VideoList>(
         stream: movieBloc.videoList,
         initialData: initialVideos,
@@ -66,7 +68,7 @@ class VideoListWidget extends StatelessWidget {
                       children: <Widget>[
                         Container(
                             alignment: Alignment.center,
-                            width:160,
+                            width:size,
                             decoration: _decoration,
                             padding: const EdgeInsets.all(5.0),
                             child: InkWell(
@@ -89,10 +91,10 @@ class VideoListWidget extends StatelessWidget {
                             )
                         ),
                         Container(
-                            width:160,
+                            width:size+20,
                             child: Padding( // some padding
                               padding: const EdgeInsets.only(top: 5.0),
-                              child: Text(_getText(video.title),style: Theme.of(context).textTheme.bodyText1,overflow: TextOverflow.clip),
+                              child: Text(_getText(video.title),style: Theme.of(context).textTheme.bodyText1,overflow: TextOverflow.fade, maxLines: 3,),
                             )
                         ),
                       ],

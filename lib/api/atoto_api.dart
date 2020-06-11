@@ -78,7 +78,6 @@ class AtotoApi {
       baseUrl,
       'api/video/'+id.toString(),
     );
-    print(Uri);
     final String response = await _getRequest(uri,'get');
     final FullVideoInfo info = response!=null?FullVideoInfo.fromJSON(json.decode(response)):null;
     return info;

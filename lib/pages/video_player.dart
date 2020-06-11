@@ -1,4 +1,5 @@
 import 'package:avideo/blocs/bloc_provider.dart';
+import 'package:avideo/main.dart';
 import 'package:avideo/models/enums/full_video_info.dart';
 import 'package:chewie/chewie.dart';
 import 'package:flutter/material.dart';
@@ -15,7 +16,7 @@ class VideoPlayer extends StatefulWidget {
   _VideoPlayerItemState createState() => _VideoPlayerItemState();
 }
 
-class _VideoPlayerItemState extends State<VideoPlayer> {
+class _VideoPlayerItemState extends State<VideoPlayer>  with RouteAware {
   ChewieController _chewieController;
   VideoPlayerController _controller;
   MovieInfoBloc movieBloc;
@@ -25,8 +26,22 @@ class _VideoPlayerItemState extends State<VideoPlayer> {
   void initState() {
     movieBloc = BlocProvider.of<MovieInfoBloc>(context);
     super.initState();
+
   }
 
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    routeObserver.subscribe(this, ModalRoute.of(context));
+  }
+
+
+  @override
+  void didPushNext() {
+    super.didPushNext();
+    deactivate();
+  }
 
   buildPlaceholderImage(){
     return Center(
@@ -35,7 +50,6 @@ class _VideoPlayerItemState extends State<VideoPlayer> {
   }
 
   Future<void> initVideoPlayer(String url) async{
-    print(url);
       _controller = VideoPlayerController.network(url);
       try {
       await _controller.initialize().then((value) =>
@@ -82,6 +96,13 @@ class _VideoPlayerItemState extends State<VideoPlayer> {
       }, );
   }
 
+  @override
+  void deactivate() {
+    _controller.pause();
+    _controller.dispose();
+    _chewieController.dispose();
+    super.deactivate();
+  }
 
   @override
   void dispose() {

@@ -7,6 +7,7 @@ import 'package:avideo/blocs/bloc_provider.dart';
 import 'package:avideo/blocs/favorite_bloc.dart';
 import 'package:avideo/pages/first_page.dart';
 
+final RouteObserver<PageRoute> routeObserver = RouteObserver<PageRoute>();
 
 Future<void> main() async {
 //  debugPrintRebuildDirtyWidgets = true;
@@ -30,7 +31,8 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
         title: 'Atoto',
         theme: ThemeData(primarySwatch: Colors.blue),
-        home: FirstPage()
+        home: FirstPage(),
+        navigatorObservers: [routeObserver],
 
     );
   }

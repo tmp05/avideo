@@ -71,6 +71,7 @@ class MovieInfoBloc extends BlocBase {
   }
 
 
+
     @override
   void dispose() {
     _queryController.close();

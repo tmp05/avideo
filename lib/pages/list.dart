@@ -29,6 +29,7 @@ class ListPage extends StatelessWidget {
         BlocProvider.of<MovieCatalogBloc>(context);
     movieBloc.changeSection(section);
     final FavoriteBloc favoriteBloc = BlocProvider.of<FavoriteBloc>(context);
+
     return Scaffold(
       key: _scaffoldKey,
       body: Column(
@@ -44,8 +45,8 @@ class ListPage extends StatelessWidget {
                 builder: (BuildContext context,
                     AsyncSnapshot<List<SerialCard>> snapshot) {
                   return GridView.builder(
-                    gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                      crossAxisCount: 2,
+                    gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                      crossAxisCount: (MediaQuery.of(context).size.width/200).round(),
                       childAspectRatio: 1.0,
                     ),
                     itemBuilder: (BuildContext context, int index) {

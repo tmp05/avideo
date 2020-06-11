@@ -1,3 +1,4 @@
+import 'package:avideo/main.dart';
 import 'package:avideo/models/enums/full_video_info.dart';
 import 'package:avideo/models/movie_info.dart';
 import 'package:chewie/chewie.dart';
@@ -11,6 +12,8 @@ import 'package:avideo/widgets/main_menu_widget.dart';
 import 'package:avideo/widgets/text_row_widget.dart';
 import 'package:avideo/widgets/video_list_widget.dart';
 import 'package:video_player/video_player.dart';
+
+
 
 class VideoPlayItem extends StatefulWidget {
   const VideoPlayItem({
@@ -35,7 +38,7 @@ class VideoPlayItem extends StatefulWidget {
   _VideoPlayItemState createState() => _VideoPlayItemState();
 }
 
-class _VideoPlayItemState extends State<VideoPlayItem> {
+class _VideoPlayItemState extends State<VideoPlayItem> with RouteAware {
   ChewieController _chewieController;
   VideoPlayerController _controller;
   MovieInfoBloc _bloc;
@@ -46,8 +49,23 @@ class _VideoPlayItemState extends State<VideoPlayItem> {
     _bloc = MovieInfoBloc(AtotoApi());
     _bloc.requestFullVideoInfo(widget.video.id);
     super.initState();
+    //bool isCurrent = ModalRoute.of(context).isCurrent;
+
   }
 
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    routeObserver.subscribe(this, ModalRoute.of(context));
+  }
+
+
+
+  @override
+  void didPushNext() {
+    super.didPushNext();
+    deactivate();
+  }
 
   void _setVideoController(VideoInfo data) {
 
@@ -57,9 +75,6 @@ class _VideoPlayItemState extends State<VideoPlayItem> {
       _chewieController.dispose();
 
     _controller = VideoPlayerController.network(data.url1);
-
-    print(data.url1);
-    print(data.url2);
 
     _chewieController = ChewieController(
       videoPlayerController: _controller,
@@ -100,7 +115,6 @@ class _VideoPlayItemState extends State<VideoPlayItem> {
   }
 
 
-
    @override
   Widget build(BuildContext context){
      return  StreamBuilder<FullVideoInfo>(
@@ -112,7 +126,7 @@ class _VideoPlayItemState extends State<VideoPlayItem> {
            _setVideoController(snapshot.data.videoInfo);
            _bloc.requestSeasonVideoList(snapshot.data.videoList);
            _currentVideo = snapshot.data.videoInfo;
-            return   Scaffold(
+            return  Scaffold(
                body:  CustomScrollView(
                            slivers: <Widget>[
                              const SliverToBoxAdapter(child: MainMenuWidget()),
@@ -123,14 +137,23 @@ class _VideoPlayItemState extends State<VideoPlayItem> {
                                  child:VideoListWidget(initialVideos: snapshot.data.videoList,bloc:_bloc, selectedVideo: _currentVideo.id))
                            ]
                  )
-               );
+            );
             }
          }, );
   }
 
 
   @override
+  void deactivate() {
+    _controller.pause();
+    _controller.dispose();
+    _chewieController.dispose();
+    super.deactivate();
+  }
+
+  @override
   void dispose() {
+   routeObserver.unsubscribe(this);
    super.dispose();
    if (_controller!=null)
       _controller.dispose();
