@@ -1,6 +1,11 @@
+import 'package:avideo/blocs/application_bloc.dart';
+import 'package:avideo/models/enums/genre.dart';
+import 'package:avideo/models/filters.dart';
 import 'package:flutter/material.dart';
 import 'package:avideo/blocs/bloc_provider.dart';
 import 'package:avideo/blocs/movie_catalog_bloc.dart';
+
+import '../constants.dart';
 
 class FiltersSummary extends StatelessWidget {
   const FiltersSummary({
@@ -9,25 +14,42 @@ class FiltersSummary extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-//    final MovieGenre genre = ApplicationProvider.of(context).genres.firstWhere((g) => g.genre == data.genre);
     final MovieCatalogBloc movieBloc = BlocProvider.of<MovieCatalogBloc>(context);
+    final ApplicationBloc appBloc = BlocProvider.of<ApplicationBloc>(context);
+    MovieFilters currentFilter= MovieFilters();
 
-    return Container(
-      width: double.infinity,
-      height: 40.0,
-      decoration: BoxDecoration(
-        border: Border.all(
-          color: Colors.black,
-          width: 1.0,
-        ),
-      ),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+    movieBloc.outFilters.listen((MovieFilters filters){
+      currentFilter =  MovieFilters(
+          minReleaseDate: filters.minReleaseDate,
+          maxReleaseDate: filters.maxReleaseDate,
+          sort: filters.sort,
+          genre: filters.genre);
+    });
+
+    return       Wrap(
+        spacing: 6.0,
+        runSpacing: 6.0,
         children: <Widget>[
-          StreamBuilder<int>(
-            stream: movieBloc.outGenre,
-            builder: (BuildContext context, AsyncSnapshot<int> snapshot){
-              return Text('Genre: ${snapshot.data}');
+          StreamBuilder<List<Genre>>(
+            stream: appBloc.outMovieGenres,
+            builder: (BuildContext context, AsyncSnapshot<List<Genre>> snapshot){
+              if (snapshot.data==null)
+                return Container();
+              else
+                return  DropdownButton<Genre>(
+                  hint: const Text(Constants.genreFilterText),
+                  items: snapshot.data.map((Genre genre) {
+                    return DropdownMenuItem<Genre>(
+                      value: genre,
+                      child: Text(genre.title),
+                    );
+                  }).toList(),
+                  onChanged: (Genre newMovieGenre) {
+                    if (currentFilter.genre!=newMovieGenre) {
+                      currentFilter.genre = newMovieGenre;
+                      movieBloc.inFilters.add(currentFilter);
+                    }
+                  });
             },
           ),
           StreamBuilder<List<int>>(
@@ -39,14 +61,35 @@ class FiltersSummary extends StatelessWidget {
               return Container();
             },
           ),
+          DropdownButton<SortItem>(
+            onChanged: (SortItem value) {
+             if (currentFilter.sort!=value) {
+                  currentFilter.sort = value;
+                  movieBloc.inFilters.add(currentFilter);
+                }
+            },
+            hint: const Text(Constants.sortText),
+            items: Constants.sortItems.map((SortItem item) {
+              return  DropdownMenuItem<SortItem>(
+                value: item,
+                child: Row(
+                  children: <Widget>[
+                    const SizedBox(width: 5,),
+                    Text(item.name,style:  const TextStyle(color: Constants.blackColor)),
+                  ],
+                ),
+              );
+            }).toList(),
+          )
 //          StreamBuilder<int>(
 //            stream: movieBloc.outTotalMovies,
 //            builder: (BuildContext context, AsyncSnapshot<int> snapshot){
 //              return Text('Total: ${snapshot.data}');
 //            },
 //          ),
-        ],
-      ),
-    );
+        ]);
   }
+
+
+
 }

@@ -18,7 +18,7 @@ class HomePage extends StatelessWidget {
         body:  CustomScrollView(
             slivers: <Widget>[
               SliverToBoxAdapter(
-                  child: MainMenuWidget(nameController: nameController,passwordController: passwordController,)),
+                  child: MainMenuWidget()),
               SliverToBoxAdapter(
                   child: ProfileWidget(nameController: nameController,passwordController: passwordController,)),
        ]

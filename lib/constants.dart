@@ -28,8 +28,8 @@ class Constants {
   static const String filmText = 'ФИЛЬМЫ';
   static const String serialText = 'СЕРИАЛЫ';
   static const String animeText = 'АНИМЕ';
-  static const String customText = 'АНИМЕ';
-
+  static const String customText = 'настройки';
+  static const String sortText = 'сортировка';
 
   static const String fieldIsNecessaryText ='Это поле обязательно для выполнения';
   static const String emailIsNecessaryText ='Без email авторизация невозможна';
@@ -57,6 +57,9 @@ class Constants {
   static const String payMenuText = 'Оплата доступа';
   static const String referalMenuText = 'Реферальная система';
   static const String devicesMenuText = 'Привязка устройств';
+  static const String listFilterText = 'Настройка списка';
+
+  static const String genreFilterText = 'жанр';
 
   static const List<Item> items = <Item>[
     Item(Constants.profileMenuText,Icon(Icons.person)),
@@ -64,6 +67,14 @@ class Constants {
     Item(Constants.exitText,Icon(Icons.exit_to_app)),
   ];
 
+  static const List<SortItem> sortItems = <SortItem>[
+    SortItem('по просмотрам',''),
+    SortItem('по просмотрам за все время','top'),
+    SortItem('по обновлению','fresh'),
+    SortItem('по дате добавления','last'),
+    SortItem('по рейтингу кинопоиска','kinopoisk'),
+    SortItem('по рейтингу IMDB','imdb'),
+  ];
 }
 
 class Item {
@@ -71,3 +82,10 @@ class Item {
   final String name;
   final Icon icon;
 }
+
+class SortItem {
+  const SortItem(this.name,this.id);
+  final String name;
+  final String id;
+}
+

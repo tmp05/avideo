@@ -4,12 +4,13 @@ import 'package:avideo/api/atoto_api.dart';
 import 'package:avideo/blocs/bloc_provider.dart';
 import 'package:avideo/models/enums/genre.dart';
 import 'package:avideo/models/enums/genres_list.dart';
+import 'package:rxdart/rxdart.dart';
 
 class ApplicationBloc implements BlocBase {
 
   ApplicationBloc() {
    api.movieGenres().then((GenresList list) {
-      _genresList = list;
+     _outMovieGenres.add(UnmodifiableListView<Genre>(list.genres));
     });
 
     _cmdController.stream.listen((_){
@@ -17,9 +18,10 @@ class ApplicationBloc implements BlocBase {
     });
   }
 
-  final StreamController<List<Genre>> _syncController = StreamController<List<Genre>>.broadcast();
-  Stream<List<Genre>> get outMovieGenres => _syncController.stream;
 
+  final StreamController<List<Genre>> _syncController = BehaviorSubject<List<Genre>>();
+  Stream<List<Genre>> get outMovieGenres => _syncController.stream;
+  Sink<List<Genre>> get _outMovieGenres => _syncController.sink;
   /// 
   final StreamController<List<Genre>> _cmdController = StreamController<List<Genre>>.broadcast();
   StreamSink <List<Genre>> get getMovieGenres => _cmdController.sink;

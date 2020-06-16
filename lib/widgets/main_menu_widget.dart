@@ -1,3 +1,4 @@
+import 'package:avideo/pages/home.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:avideo/api/atoto_api.dart';
@@ -10,14 +11,8 @@ import 'package:avideo/pages/list.dart';
 
 class MainMenuWidget extends StatelessWidget {
   const MainMenuWidget( {
-    Key key,
-    this.nameController,
-    this.passwordController
+    Key key
   }) : super(key: key);
-
-
-  final TextEditingController nameController;
-  final TextEditingController passwordController;
 
   @override
   Widget build(BuildContext context) {
@@ -88,6 +83,16 @@ class MainMenuWidget extends StatelessWidget {
 
   void _actionItem(String name, BuildContext context) {
     switch (name){
+      case Constants.profileMenuText:
+        Navigator
+            .of(context)
+            .push(MaterialPageRoute<void>(builder: (BuildContext context) {
+          return BlocProvider<MovieCatalogBloc>(
+            bloc: MovieCatalogBloc(),
+            child: HomePage(nameController: TextEditingController(), passwordController: TextEditingController()),
+          );
+        }));
+        break;
       case Constants.exitText:
         AtotoApi().logOut().then((bool onValue){
           if (onValue)
@@ -95,7 +100,7 @@ class MainMenuWidget extends StatelessWidget {
                 .push(MaterialPageRoute<void>(builder: (BuildContext context) {
                   final AuthBloc authBloc = BlocProvider.of<AuthBloc>(context);
                   authBloc.addError(null);
-                  return LoginPage(nameController: nameController,passwordController: passwordController,);
+                  return LoginPage(nameController: TextEditingController(),passwordController: TextEditingController(),);
                 }));
         });
         break;

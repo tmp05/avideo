@@ -44,6 +44,7 @@ class AuthBloc extends BlocBase {
   Sink<bool> get _changeSecure => _secureStreamController.sink;
 
   void changeSecure(bool data) {
+    print('now secure is '+data.toString());
     _changeSecure.add(data);
   }
 

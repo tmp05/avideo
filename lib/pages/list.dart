@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:avideo/models/filters.dart';
 import 'package:flutter/material.dart';
 import 'package:avideo/api/atoto_api.dart';
 import 'package:avideo/blocs/bloc_provider.dart';
@@ -8,7 +9,6 @@ import 'package:avideo/blocs/movie_catalog_bloc.dart';
 import 'package:avideo/blocs/movie_info_bloc.dart';
 import 'package:avideo/models/serial_card.dart';
 import 'package:avideo/pages/filters.dart';
-import 'package:avideo/widgets/filters_summary.dart';
 import 'package:avideo/widgets/main_menu_widget.dart';
 import 'package:avideo/widgets/movie_card_widget.dart';
 import 'package:avideo/pages/video_card.dart';
@@ -29,6 +29,13 @@ class ListPage extends StatelessWidget {
         BlocProvider.of<MovieCatalogBloc>(context);
     movieBloc.changeSection(section);
     final FavoriteBloc favoriteBloc = BlocProvider.of<FavoriteBloc>(context);
+    //setting new empty filters
+    movieBloc.inFilters.add(MovieFilters());
+
+    void _openEndDrawer() {
+      _scaffoldKey.currentState.openEndDrawer();
+    }
+
 
     return Scaffold(
       key: _scaffoldKey,
@@ -36,7 +43,24 @@ class ListPage extends StatelessWidget {
         mainAxisAlignment: MainAxisAlignment.start,
         children: <Widget>[
           const MainMenuWidget(),
-          const FiltersSummary(),
+    //      const FiltersSummary(),
+          StreamBuilder<MovieFilters>(
+            stream: movieBloc.outFilters,
+              builder: (BuildContext context,
+                  AsyncSnapshot<MovieFilters> snapshot) {
+//              if (snapshot.data!=null) {
+                String filterText = 'Отбор:';
+                if (snapshot.data!=null)
+                  {if (snapshot.data.genre != null) filterText =
+                      filterText + " Жанр - " + snapshot.data.genre.title;
+                  if (snapshot.data.sort != null) filterText =
+                      filterText + " Сортировка - " + snapshot.data.sort.name;}
+                return InkWell(
+                    child: Text(filterText),
+                    onTap: () => _openEndDrawer()
+                );
+              }
+          ),
           Expanded(
             // Display an infinite GridView with the list of all movies in the catalog,
             // that meet the filters

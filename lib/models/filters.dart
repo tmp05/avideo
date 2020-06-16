@@ -1,3 +1,6 @@
+import 'package:avideo/constants.dart';
+import 'package:avideo/models/enums/genre.dart';
+
 class MovieFilters {
   MovieFilters({
     this.minReleaseDate,
@@ -5,14 +8,16 @@ class MovieFilters {
     this.genre,
     this.year,
     this.country,
-    this.studio
+    this.studio,
+    this.sort
   });
 
-  final int minReleaseDate;
-  final int maxReleaseDate;
-  final int genre;
-  final int year;
-  final int country;
-  final int studio;
+  int minReleaseDate;
+  int maxReleaseDate;
+  Genre genre;
+  int year;
+  int country;
+  int studio;
+  SortItem sort;
 
 }

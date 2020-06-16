@@ -3,6 +3,8 @@ import 'dart:collection';
 
 import 'package:avideo/api/atoto_api.dart';
 import 'package:avideo/blocs/bloc_provider.dart';
+import 'package:avideo/constants.dart';
+import 'package:avideo/models/enums/genre.dart';
 import 'package:avideo/models/serial_card.dart';
 import 'package:avideo/models/filters.dart';
 import 'package:avideo/models/serial_page_result.dart';
@@ -10,11 +12,14 @@ import 'package:rxdart/rxdart.dart';
 
 class MovieCatalogBloc implements BlocBase {
    String section;
+   SortItem _sort;
   ///
   /// Constructor
   ///`
   MovieCatalogBloc() {
     outSection.listen((String curSection) => section = curSection);
+
+    outSort.listen((SortItem curSort) => _sort = curSort);
     //
     // As said, each time we will have to render a MovieCard, the latter will send us
     // the [index] of the movie to render.  If the latter has not yet been fetched
@@ -42,7 +47,7 @@ class MovieCatalogBloc implements BlocBase {
   ///
   /// Genre
   ///
-  int _genre = 28;
+  Genre _genre;
 
   ///
   /// Release date min
@@ -75,7 +80,7 @@ class MovieCatalogBloc implements BlocBase {
   Sink<List<SerialCard>> get _inMoviesList => _moviesController.sink;
   Stream<List<SerialCard>> get outMoviesList => _moviesController.stream;
 
-
+ //info about current section
   final PublishSubject<String> _sectionController = PublishSubject<String>();
   Stream<String> get outSection => _sectionController.stream;
 
@@ -83,6 +88,13 @@ class MovieCatalogBloc implements BlocBase {
      _sectionController.add(section);
    }
 
+  //info about current sort
+   final PublishSubject<SortItem> _sortController = PublishSubject<SortItem>();
+   Stream<SortItem> get outSort => _sortController.stream;
+
+   void changeSort(SortItem sort){
+     _sortController.add(sort);
+   }
   ///
   /// Each time we need to render a MovieCard, we will pass its [index]
   /// so that, we will be able to check whether it has already been fetched
@@ -98,16 +110,16 @@ class MovieCatalogBloc implements BlocBase {
   ///
   final BehaviorSubject<int> _totalMoviesController = BehaviorSubject<int>(seedValue: 0);
   final BehaviorSubject<List<int>> _releaseDatesController = BehaviorSubject<List<int>>(seedValue: <int>[2000,2005]);
-  final BehaviorSubject<int> _genreController = BehaviorSubject<int>(seedValue: 28);
+  final BehaviorSubject<Genre> _genreController = BehaviorSubject<Genre>();
   Sink<List<int>> get _inReleaseDates => _releaseDatesController.sink;
   Stream<List<int>> get outReleaseDates => _releaseDatesController.stream;
-  Sink<int> get _inGenre => _genreController.sink;
-  Stream<int> get outGenre => _genreController.stream;
+  Sink<Genre> get _inGenre => _genreController.sink;
+  Stream<Genre> get outGenre => _genreController.stream;
 
   ///
   /// We also want to handle changes to the filters
   ///
-  final BehaviorSubject<MovieFilters> _filtersController = BehaviorSubject<MovieFilters>(seedValue: MovieFilters(genre: 28, minReleaseDate: 2000, maxReleaseDate: 2020));
+  final BehaviorSubject<MovieFilters> _filtersController = BehaviorSubject<MovieFilters>();
   Sink<MovieFilters> get inFilters => _filtersController.sink;
   Stream<MovieFilters> get outFilters => _filtersController.stream;
 
@@ -133,6 +145,7 @@ class MovieCatalogBloc implements BlocBase {
     _filtersController.close();
     _curSerialStream.close();
     _sectionController.close();
+    _sortController.close();
   }
 
   // ############# HANDLING  #####################
@@ -160,7 +173,9 @@ class MovieCatalogBloc implements BlocBase {
           // Remember that we are fetching it
           _pagesBeingFetched.add(pageIndex);
           // Fetch it
-          api.pagedList(section:section, pageIndex: pageIndex,
+          api.pagedList(section:section,
+                        pageIndex: pageIndex,
+                        sort:_sort,
                         genre: _genre,
                         minYear: _minReleaseDate,
                         maxYear: _maxReleaseDate)
@@ -229,6 +244,7 @@ class MovieCatalogBloc implements BlocBase {
     _minReleaseDate = result.minReleaseDate;
     _maxReleaseDate = result.maxReleaseDate;
     _genre = result.genre;
+    _sort = result.sort;
 
     _fetchPages.clear();
     _pagesBeingFetched.clear();
@@ -236,7 +252,8 @@ class MovieCatalogBloc implements BlocBase {
     // Let's notify who needs to know
     _inGenre.add(_genre);
     _inReleaseDates.add(<int>[_minReleaseDate, _maxReleaseDate]);
-    //_inTotalMovies.add(0);
+    _sortController.add(_sort);
+
 
     // we need to tell about a change so that we pick another list of movies
     _inMoviesList.add(<SerialCard>[]);

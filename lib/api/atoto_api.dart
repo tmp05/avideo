@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:avideo/models/enums/genre.dart';
 import 'package:http/http.dart' as http;
 import 'package:avideo/constants.dart';
 import 'package:avideo/models/auth_result.dart';
@@ -23,16 +24,20 @@ class AtotoApi {
   final HttpClient _httpClient =  HttpClient();
   ///
   /// Returns the list of movies/tv-show, based on criteria:
-  /// [type]: movie or tv (show)
+  /// [section]: movie or tv (show)
   /// [pageIndex]: page
   /// [minYear, maxYear]: release dates range
   /// [genre]: genre
   ///
-  Future<SerialPageResult> pagedList({String section, int pageIndex= 1, int minYear= 2000, int maxYear= 2019, int genre  = 28}) async {
-
-    Map<String,List> data = {
-      'section': [section]
+  Future<SerialPageResult> pagedList({String section,SortItem sort, int pageIndex= 1, int minYear= 2000, int maxYear= 2019, Genre genre}) async {
+    String sortId = sort!=null?sort.id:'';
+    Map<String,dynamic> data = {
+      'section': [section],
+      'sort':'$sortId',
+      'page': '$pageIndex'
     };
+    if (genre!=null) data.addAll({'category': [genre.id]});
+    print(data);
     var body = json.encode(data);
 
     final String response = await _getHttpRequest('https://atoto.ru/api/channel/list','post',body:body);

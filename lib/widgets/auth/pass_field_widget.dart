@@ -68,7 +68,7 @@ class PassFieldWidget extends StatelessWidget {
                       stream: authBloc.curSecure,
                       builder: (BuildContext context, AsyncSnapshot<bool> snapshot) {
                         return TextFormField(
-                          obscureText:snapshot.data??false,
+                          obscureText:snapshot.data!=false?true:false,
                           style: const TextStyle(color: Colors.black),
                           keyboardType: TextInputType.text,
                           controller: controller,
@@ -88,8 +88,8 @@ class PassFieldWidget extends StatelessWidget {
                   stream: authBloc.curSecure,
                   builder: (BuildContext context, AsyncSnapshot<bool> snapshot) {
                     return IconButton(
-                        icon:snapshot.data??false? const Icon(Icons.visibility):const Icon(Icons.visibility_off),
-                        onPressed:(){authBloc.changeSecure(snapshot.data??false);}
+                        icon:snapshot.data==false?const Icon(Icons.visibility):const Icon(Icons.visibility_off),
+                        onPressed:(){authBloc.changeSecure(snapshot.data==false?true:false);}
                     );
                   }),
           ],

@@ -1,5 +1,3 @@
-import 'dart:async';
-
 import 'package:avideo/constants.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_range_slider/flutter_range_slider.dart' as rnslider;
@@ -28,10 +26,9 @@ class FiltersPageState extends State<FiltersPage> {
   MovieCatalogBloc _movieBloc;
   double _minReleaseDate = 2000;
   double _maxReleaseDate=2019;
-  Genre _genre;
-  List<Genre> _genres;
 
   bool _isInit = false;
+  MovieFilters currentFilter;
 
   @override
   void didChangeDependencies() {
@@ -44,7 +41,6 @@ class FiltersPageState extends State<FiltersPage> {
     if (_isInit == false){
       _appBloc = BlocProvider.of<ApplicationBloc>(context);
       _movieBloc = BlocProvider.of<MovieCatalogBloc>(context);
-
       _getFilterParameters();
     }
   }
@@ -70,6 +66,53 @@ class FiltersPageState extends State<FiltersPage> {
           mainAxisAlignment: MainAxisAlignment.start,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: <Widget>[
+            StreamBuilder<List<Genre>>(
+              stream: _appBloc.outMovieGenres,
+              builder: (BuildContext context, AsyncSnapshot<List<Genre>> snapshot){
+                if (snapshot.data==null)
+                  return Container();
+                else
+                  return  DropdownButton<Genre>(
+                      value: currentFilter!=null?currentFilter.genre:null,
+                      hint: const Text(Constants.genreFilterText),
+                      items: snapshot.data.map((Genre genre) {
+                        return DropdownMenuItem<Genre>(
+                          value: genre,
+                          child: Text(genre.title),
+                        );
+                      }).toList(),
+                      onChanged: (Genre newMovieGenre) {
+                        if (currentFilter.genre!=newMovieGenre) {
+                          setState(() {
+                            currentFilter.genre = newMovieGenre;
+                          });
+                        }
+                      });
+              },
+            ),
+            DropdownButton<SortItem>(
+              onChanged: (SortItem value) {
+                if (currentFilter.sort!=value) {
+                  setState(() {
+                    currentFilter.sort = value;
+                  });
+                }
+              },
+              value: currentFilter!=null?currentFilter.sort:null,
+              hint: const Text(Constants.sortText),
+              items: Constants.sortItems.map((SortItem item) {
+                return  DropdownMenuItem<SortItem>(
+                  value: item,
+                  child: Row(
+                    children: <Widget>[
+                      const SizedBox(width: 5,),
+                      Text(item.name,style:  const TextStyle(color: Constants.blackColor)),
+                    ],
+                  ),
+                );
+              }).toList(),
+            ),
+            Container(height: 10,),
             const Text(
               'Years:',
               style: TextStyle(decoration: TextDecoration.underline),
@@ -118,25 +161,7 @@ class FiltersPageState extends State<FiltersPage> {
             const Divider(),
            // Genre Selector
 
-           Row(
-              mainAxisAlignment: MainAxisAlignment.start,
-              children: <Widget>[
-                const Text('Genre:'),
-                const SizedBox(width: 24.0),
-                DropdownButton<Genre>(
-                    items: _genres.map((Genre genre) {
-                      return DropdownMenuItem<Genre>(
-                        value: genre,
-                        child: Text(genre.title),
-                      );
-                    }).toList(),
-                    value: _genre,
-                    onChanged: (Genre newMovieGenre) {
-                      _genre = newMovieGenre;
-                      setState(() {});
-                    }),
-              ],
-            ),
+
           ],
         ),
       ),
@@ -146,16 +171,7 @@ class FiltersPageState extends State<FiltersPage> {
       floatingActionButton: FloatingActionButton(
         child: const Icon(Icons.check),
         onPressed: () {
-          //
-          // When the user accepts the changes to the filters,
-          // we need to send the new filters to the MovieCatalogBloc filters sink.
-          //
-          _movieBloc.inFilters.add(MovieFilters(
-            minReleaseDate: _minReleaseDate.round(),
-            maxReleaseDate: _maxReleaseDate.round(),
-            genre: _genre.id,
-          ));
-
+          _movieBloc.inFilters.add(currentFilter);
           // close the screen
           Navigator.of(context).pop();
         },
@@ -172,31 +188,18 @@ class FiltersPageState extends State<FiltersPage> {
   /// This is ugly but to be considered as a study case.
   ///
   void _getFilterParameters() {
-    StreamSubscription subscriptionMovieGenres ;
-    StreamSubscription subscriptionFilters;
-
-    subscriptionMovieGenres = _appBloc.outMovieGenres.listen((List<Genre> data){
-      _genres = data;
-
-      subscriptionFilters = _movieBloc.outFilters.listen((MovieFilters filters) {
-        _minReleaseDate = filters.minReleaseDate.toDouble();
-        _maxReleaseDate = filters.maxReleaseDate.toDouble();
-        _genre = _genres.firstWhere((g) => g.id == filters.genre);
-
-        // Simply to make sure the subscriptions are released
-        subscriptionMovieGenres.cancel();
-        subscriptionFilters.cancel();
-
-        // Now that we have all parameters, we may build the actual page
-        if (mounted){
-          setState((){
-            _isInit = true;
-          });
-        }
-      });
+    _movieBloc.outFilters.listen((MovieFilters filters){
+      currentFilter =  MovieFilters(
+          minReleaseDate: filters.minReleaseDate,
+          maxReleaseDate: filters.maxReleaseDate,
+          sort: filters.sort,
+          genre: filters.genre);
     });
-
-    // Send a request to get the list of the movie genres via stream
-    _appBloc.getMovieGenres.add(null);
+    // Now that we have all parameters, we may build the actual page
+    if (mounted){
+      setState((){
+        _isInit = true;
+      });
+    }
   }
 }
