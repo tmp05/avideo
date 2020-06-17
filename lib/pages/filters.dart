@@ -1,4 +1,5 @@
 import 'package:avideo/constants.dart';
+import 'package:avideo/widgets/multi_select_chip_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_range_slider/flutter_range_slider.dart' as rnslider;
 import 'package:avideo/blocs/application_bloc.dart';
@@ -30,6 +31,13 @@ class FiltersPageState extends State<FiltersPage> {
   bool _isInit = false;
   MovieFilters currentFilter;
 
+  List<String> reportList=List();
+  List<String> selectedReportList = List();
+
+  List<Genre> reportGenreList=List();
+  List<Genre> selectedGenreReportList = List();
+
+
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
@@ -43,7 +51,45 @@ class FiltersPageState extends State<FiltersPage> {
       _movieBloc = BlocProvider.of<MovieCatalogBloc>(context);
       _getFilterParameters();
     }
+
   }
+
+  _setGenre(){
+    setState(() {
+      selectedGenreReportList.clear();
+      selectedReportList.forEach((element) { selectedGenreReportList.add(reportGenreList.firstWhere((Genre g) => g.title == element));});
+      currentFilter.genre = selectedGenreReportList;
+    });
+  }
+
+  _showReportDialog(String text, Function toDo) {
+    showDialog(
+        context: context,
+        builder: (BuildContext context) {
+          //Here we will build the content of the dialog
+          return AlertDialog(
+            title: Text(text),
+            content: MultiSelectChip(
+              reportList,
+              onSelectionChanged: (selectedList) {
+                setState(() {
+                  selectedReportList = selectedList;
+                });
+              },
+            ),
+            actions: <Widget>[
+              InkWell(
+                child: const Text(Constants.okText),
+                onTap: () {
+                 toDo();
+                  Navigator.of(context).pop();
+                },
+              )
+            ],
+          );
+        });
+  }
+
 
   @override
   Widget build(BuildContext context) {
@@ -68,28 +114,19 @@ class FiltersPageState extends State<FiltersPage> {
           children: <Widget>[
             StreamBuilder<List<Genre>>(
               stream: _appBloc.outMovieGenres,
-              builder: (BuildContext context, AsyncSnapshot<List<Genre>> snapshot){
-                if (snapshot.data==null)
+              builder: (BuildContext context, AsyncSnapshot<List<Genre>> snapshot) {
+                if (snapshot.data == null)
                   return Container();
                 else
-                  return  DropdownButton<Genre>(
-                      value: currentFilter!=null?currentFilter.genre:null,
-                      hint: const Text(Constants.genreFilterText),
-                      items: snapshot.data.map((Genre genre) {
-                        return DropdownMenuItem<Genre>(
-                          value: genre,
-                          child: Text(genre.title),
-                        );
-                      }).toList(),
-                      onChanged: (Genre newMovieGenre) {
-                        if (currentFilter.genre!=newMovieGenre) {
-                          setState(() {
-                            currentFilter.genre = newMovieGenre;
-                          });
-                        }
-                      });
-              },
-            ),
+                  //selectedReportList.clear();
+                  snapshot.data.asMap().entries.forEach((e) => {reportList.add(e.value.title),reportGenreList.add(e.value)});
+                  return  InkWell(
+                      child:selectedReportList.length==0?Text(Constants.genreFilterText):Text(selectedReportList.join(" , ")),
+                      onTap: () {
+                        _showReportDialog(Constants.genreTitleFilterText,_setGenre);
+                      },
+                    );
+              }),
             DropdownButton<SortItem>(
               onChanged: (SortItem value) {
                 if (currentFilter.sort!=value) {
@@ -179,6 +216,7 @@ class FiltersPageState extends State<FiltersPage> {
     );
   }
 
+
   ///
   /// Very tricky.
   ///
@@ -203,3 +241,6 @@ class FiltersPageState extends State<FiltersPage> {
     }
   }
 }
+
+
+

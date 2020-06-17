@@ -7,4 +7,5 @@ class GenresList {
   List<Genre> genres = <Genre>[];
 
   Genre findById(int genre) => genres.firstWhere((Genre g) => g.id == genre);
+  Genre findByTitle(String genre) => genres.firstWhere((Genre g) => g.title == genre);
 }

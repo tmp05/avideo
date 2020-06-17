@@ -1,5 +1,3 @@
-import 'package:avideo/blocs/application_bloc.dart';
-import 'package:avideo/models/enums/genre.dart';
 import 'package:avideo/models/filters.dart';
 import 'package:flutter/material.dart';
 import 'package:avideo/blocs/bloc_provider.dart';
@@ -15,7 +13,7 @@ class FiltersSummary extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final MovieCatalogBloc movieBloc = BlocProvider.of<MovieCatalogBloc>(context);
-    final ApplicationBloc appBloc = BlocProvider.of<ApplicationBloc>(context);
+    //final ApplicationBloc appBloc = BlocProvider.of<ApplicationBloc>(context);
     MovieFilters currentFilter= MovieFilters();
 
     movieBloc.outFilters.listen((MovieFilters filters){
@@ -30,28 +28,7 @@ class FiltersSummary extends StatelessWidget {
         spacing: 6.0,
         runSpacing: 6.0,
         children: <Widget>[
-          StreamBuilder<List<Genre>>(
-            stream: appBloc.outMovieGenres,
-            builder: (BuildContext context, AsyncSnapshot<List<Genre>> snapshot){
-              if (snapshot.data==null)
-                return Container();
-              else
-                return  DropdownButton<Genre>(
-                  hint: const Text(Constants.genreFilterText),
-                  items: snapshot.data.map((Genre genre) {
-                    return DropdownMenuItem<Genre>(
-                      value: genre,
-                      child: Text(genre.title),
-                    );
-                  }).toList(),
-                  onChanged: (Genre newMovieGenre) {
-                    if (currentFilter.genre!=newMovieGenre) {
-                      currentFilter.genre = newMovieGenre;
-                      movieBloc.inFilters.add(currentFilter);
-                    }
-                  });
-            },
-          ),
+
           StreamBuilder<List<int>>(
             stream: movieBloc.outReleaseDates,
             builder: (BuildContext context, AsyncSnapshot<List<int>> snapshot){

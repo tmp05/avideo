@@ -52,7 +52,7 @@ class ListPage extends StatelessWidget {
                 String filterText = 'Отбор:';
                 if (snapshot.data!=null)
                   {if (snapshot.data.genre != null) filterText =
-                      filterText + " Жанр - " + snapshot.data.genre.title;
+                      filterText + " Жанр - ";
                   if (snapshot.data.sort != null) filterText =
                       filterText + " Сортировка - " + snapshot.data.sort.name;}
                 return InkWell(

@@ -30,6 +30,7 @@ class Constants {
   static const String animeText = 'АНИМЕ';
   static const String customText = 'настройки';
   static const String sortText = 'сортировка';
+  static const String okText = 'OK';
 
   static const String fieldIsNecessaryText ='Это поле обязательно для выполнения';
   static const String emailIsNecessaryText ='Без email авторизация невозможна';
@@ -59,7 +60,8 @@ class Constants {
   static const String devicesMenuText = 'Привязка устройств';
   static const String listFilterText = 'Настройка списка';
 
-  static const String genreFilterText = 'жанр';
+  static const String genreFilterText = 'Жанр';
+  static const String genreTitleFilterText = 'Выберите жанры';
 
   static const List<Item> items = <Item>[
     Item(Constants.profileMenuText,Icon(Icons.person)),

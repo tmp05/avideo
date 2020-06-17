@@ -14,7 +14,7 @@ class MovieFilters {
 
   int minReleaseDate;
   int maxReleaseDate;
-  Genre genre;
+  List<Genre> genre;
   int year;
   int country;
   int studio;

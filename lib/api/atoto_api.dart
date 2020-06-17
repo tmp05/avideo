@@ -29,14 +29,20 @@ class AtotoApi {
   /// [minYear, maxYear]: release dates range
   /// [genre]: genre
   ///
-  Future<SerialPageResult> pagedList({String section,SortItem sort, int pageIndex= 1, int minYear= 2000, int maxYear= 2019, Genre genre}) async {
+  Future<SerialPageResult> pagedList({String section,SortItem sort, int pageIndex= 1, int minYear= 2000, int maxYear= 2019, List<Genre> genreList}) async {
     String sortId = sort!=null?sort.id:'';
     Map<String,dynamic> data = {
       'section': [section],
       'sort':'$sortId',
       'page': '$pageIndex'
     };
-    if (genre!=null) data.addAll({'category': [genre.id]});
+    if (genreList!=null) {
+      List<int> filterGenre = List();
+      genreList.forEach((element) { filterGenre.add(element.id);});
+      data.addAll({'category': filterGenre});
+    //  data.addAll({'category': [genre.id]});
+    }
+
     print(data);
     var body = json.encode(data);
 
