@@ -11,6 +11,7 @@ final RouteObserver<PageRoute> routeObserver = RouteObserver<PageRoute>();
 
 Future<void> main() async {
 //  debugPrintRebuildDirtyWidgets = true;
+  WidgetsFlutterBinding.ensureInitialized();
   return runApp(
       BlocProvider<ApplicationBloc>(
         bloc: ApplicationBloc(),

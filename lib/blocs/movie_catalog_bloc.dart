@@ -5,6 +5,7 @@ import 'package:avideo/api/atoto_api.dart';
 import 'package:avideo/blocs/bloc_provider.dart';
 import 'package:avideo/constants.dart';
 import 'package:avideo/models/enums/genre.dart';
+import 'package:avideo/models/enums/studios.dart';
 import 'package:avideo/models/serial_card.dart';
 import 'package:avideo/models/filters.dart';
 import 'package:avideo/models/serial_page_result.dart';
@@ -48,6 +49,7 @@ class MovieCatalogBloc implements BlocBase {
   /// Genre
   ///
    List<Genre> _genreList;
+   List<Studios> _studioList;
 
   ///
   /// Release date min
@@ -96,6 +98,10 @@ class MovieCatalogBloc implements BlocBase {
   //info about current sort
    final PublishSubject<SortItem> _sortController = PublishSubject<SortItem>();
    Stream<SortItem> get outSort => _sortController.stream;
+
+   //info about current genre
+   final PublishSubject<List<Studios>> _studioController = PublishSubject<List<Studios>>();
+   Stream<List<Studios>> get outStudios => _studioController.stream;
 
   ///
   /// Each time we need to render a MovieCard, we will pass its [index]
@@ -147,6 +153,7 @@ class MovieCatalogBloc implements BlocBase {
     _curSerialStream.close();
     _sectionController.close();
     _sortController.close();
+    _studioController.close();
   }
 
   // ############# HANDLING  #####################
@@ -179,7 +186,8 @@ class MovieCatalogBloc implements BlocBase {
                         sort:_sort,
                         genreList: _genreList,
                         minYear: _minReleaseDate,
-                        maxYear: _maxReleaseDate)
+                        maxYear: _maxReleaseDate,
+                        studiosList: _studioList)
               .then((SerialPageResult fetchedPage) => _handleFetchedPage(fetchedPage, pageIndex));
         }
       }
@@ -246,6 +254,7 @@ class MovieCatalogBloc implements BlocBase {
     _maxReleaseDate = result.maxReleaseDate;
     _genreList = result.genre;
     _sort = result.sort;
+    _studioList = result.studio;
 
     _fetchPages.clear();
     _pagesBeingFetched.clear();
@@ -255,6 +264,7 @@ class MovieCatalogBloc implements BlocBase {
     //_inGenre.add(_genreList);
     _inReleaseDates.add(<int>[_minReleaseDate, _maxReleaseDate]);
     _sortController.add(_sort);
+    _studioController.add(_studioList);
 
 
     // we need to tell about a change so that we pick another list of movies

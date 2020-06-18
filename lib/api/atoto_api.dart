@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:avideo/models/enums/genre.dart';
+import 'package:avideo/models/enums/studios.dart';
 import 'package:http/http.dart' as http;
 import 'package:avideo/constants.dart';
 import 'package:avideo/models/auth_result.dart';
@@ -29,7 +30,7 @@ class AtotoApi {
   /// [minYear, maxYear]: release dates range
   /// [genre]: genre
   ///
-  Future<SerialPageResult> pagedList({String section,SortItem sort, int pageIndex= 1, int minYear= 2000, int maxYear= 2019, List<Genre> genreList}) async {
+  Future<SerialPageResult> pagedList({String section,SortItem sort, int pageIndex= 1, int minYear, int maxYear, List<Genre> genreList, List<Studios> studiosList,}) async {
     String sortId = sort!=null?sort.id:'';
     Map<String,dynamic> data = {
       'section': [section],
@@ -40,7 +41,13 @@ class AtotoApi {
       List<int> filterGenre = List();
       genreList.forEach((element) { filterGenre.add(element.id);});
       data.addAll({'category': filterGenre});
-    //  data.addAll({'category': [genre.id]});
+    }
+
+    if (studiosList!=null) {
+      List<int> filterStudio = List();
+      studiosList.forEach((element) { filterStudio.add(element.value);});
+      data.addAll({'studio': filterStudio});
+      //  data.addAll({'category': [genre.id]});
     }
 
     print(data);
@@ -97,7 +104,7 @@ class AtotoApi {
   ///
   /// Returns the list of all genres
   ///
-  Future<GenresList> movieGenres({String type='movie'}) async {
+  Future<GenresList> movieGenres1() async {
     final Uri uri = Uri.https(
       baseUrl,
       'api/getCategories',
@@ -107,7 +114,32 @@ class AtotoApi {
 
     return list;
   }
+  Future<GenresList> movieGenres({String section}) async {
+    String body;
+    if ( section!=null) {
+      Map<String, dynamic> data = {
+        'section': [section],
+      };
+      body = json.encode(data);
+    }
+    else body = '';
 
+    final String response = await _getHttpRequest('https://atoto.ru/api/getCategories','get',body:body);
+    var decodedResponse = json.decode(response);
+    GenresList listData = GenresList.fromJSON(decodedResponse);
+    return listData;
+  }
+
+  Future<StudiosList> movieStudios(String section) async {
+    Map<String,dynamic> data = {
+      'section': [section],
+    };
+    var body = json.encode(data);
+    final String response = await _getHttpRequest('https://atoto.ru/api/getStudios','post',body:body);
+    var decodedResponse = json.decode(response);
+    StudiosList listData = StudiosList.fromJSON(decodedResponse['data']);
+    return listData;
+  }
 
   Future<int> getVideoNext(int videoId, int seasonId, String direction) async {
     final Uri uri = Uri.https(

@@ -1,5 +1,6 @@
 import 'package:avideo/constants.dart';
 import 'package:avideo/models/enums/genre.dart';
+import 'package:avideo/models/enums/studios.dart';
 
 class MovieFilters {
   MovieFilters({
@@ -17,7 +18,7 @@ class MovieFilters {
   List<Genre> genre;
   int year;
   int country;
-  int studio;
+  List<Studios>  studio;
   SortItem sort;
 
 }

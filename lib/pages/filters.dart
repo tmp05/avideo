@@ -1,8 +1,9 @@
+import 'package:avideo/api/atoto_api.dart';
 import 'package:avideo/constants.dart';
+import 'package:avideo/models/enums/studios.dart';
 import 'package:avideo/widgets/multi_select_chip_widget.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_range_slider/flutter_range_slider.dart' as rnslider;
-import 'package:avideo/blocs/application_bloc.dart';
+import 'package:flutter_range_slider/flutter_range_slider.dart' as rnslider; //take it away!! https://medium.com/flutter/material-range-slider-in-flutter-a285c6e3447d
 import 'package:avideo/blocs/bloc_provider.dart';
 import 'package:avideo/blocs/movie_catalog_bloc.dart';
 import 'package:avideo/models/filters.dart';
@@ -13,8 +14,10 @@ typedef FiltersPageCallback = Function(MovieFilters result);
 class FiltersPage extends StatefulWidget {
   const FiltersPage({
     Key key,
+    this.section,
   }) : super(key: key);
 
+  final String section;
 
   @override
   FiltersPageState createState() {
@@ -23,20 +26,34 @@ class FiltersPage extends StatefulWidget {
 }
 
 class FiltersPageState extends State<FiltersPage> {
-  ApplicationBloc _appBloc;
   MovieCatalogBloc _movieBloc;
-  double _minReleaseDate = 2000;
-  double _maxReleaseDate=2019;
+  int yearNow = DateTime.now().year;
 
   bool _isInit = false;
   MovieFilters currentFilter;
+
+  List <Map <String, List<String>>> dataList;
 
   List<String> reportList=List();
   List<String> selectedReportList = List();
 
   List<Genre> reportGenreList=List();
   List<Genre> selectedGenreReportList = List();
+  String genreText=Constants.genreFilterText;
 
+  List<Studios> reportStudioList=List();
+  List<Studios> selectedStudioReportList = List();
+  String studioText=Constants.studioFilterText;
+
+  List<String> lastYearsList = List();
+  String yearText = Constants.yearText;
+
+
+  @override
+  void dispose() {
+
+    super.dispose();
+  }
 
   @override
   void didChangeDependencies() {
@@ -47,7 +64,6 @@ class FiltersPageState extends State<FiltersPage> {
     // and retrieve the currently selected one, as well as the
     // filter parameters
     if (_isInit == false){
-      _appBloc = BlocProvider.of<ApplicationBloc>(context);
       _movieBloc = BlocProvider.of<MovieCatalogBloc>(context);
       _getFilterParameters();
     }
@@ -57,8 +73,18 @@ class FiltersPageState extends State<FiltersPage> {
   _setGenre(){
     setState(() {
       selectedGenreReportList.clear();
+      genreText = selectedReportList.join(" , ");
       selectedReportList.forEach((element) { selectedGenreReportList.add(reportGenreList.firstWhere((Genre g) => g.title == element));});
       currentFilter.genre = selectedGenreReportList;
+    });
+  }
+
+  _setStudio(){
+    setState(() {
+      selectedStudioReportList.clear();
+      studioText = selectedReportList.join(" , ");
+      selectedReportList.forEach((element) { selectedStudioReportList.add(reportStudioList.firstWhere((Studios g) => g.text == element));});
+      currentFilter.studio = selectedStudioReportList;
     });
   }
 
@@ -112,21 +138,39 @@ class FiltersPageState extends State<FiltersPage> {
           mainAxisAlignment: MainAxisAlignment.start,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: <Widget>[
-            StreamBuilder<List<Genre>>(
-              stream: _appBloc.outMovieGenres,
-              builder: (BuildContext context, AsyncSnapshot<List<Genre>> snapshot) {
-                if (snapshot.data == null)
-                  return Container();
-                else
-                  //selectedReportList.clear();
-                  snapshot.data.asMap().entries.forEach((e) => {reportList.add(e.value.title),reportGenreList.add(e.value)});
-                  return  InkWell(
-                      child:selectedReportList.length==0?Text(Constants.genreFilterText):Text(selectedReportList.join(" , ")),
-                      onTap: () {
-                        _showReportDialog(Constants.genreTitleFilterText,_setGenre);
-                      },
-                    );
-              }),
+              InkWell(
+                  child:Text(studioText,style: Constants.StyleFilterTextUnderline,),
+                onTap: () {
+                  AtotoApi().movieStudios(widget.section).then((value) => {
+                    reportList.clear(),
+                    reportStudioList.clear(),
+                    setState(() {
+                      value.studios.forEach((element) {
+                        reportList.add(element.text);
+                        reportStudioList.add(element);
+                      });
+                    }),
+                    _showReportDialog(Constants.studioTitleFilterText,_setStudio)
+                  });
+                },
+              ),
+            Container(height: 10,),
+            InkWell(
+              child:Text(genreText,style: Constants.StyleFilterTextUnderline,),
+              onTap: () {
+                AtotoApi().movieGenres(section:widget.section).then((value) => {
+                  reportList.clear(),
+                  reportGenreList.clear(),
+                setState(() {
+                  value.genres.forEach((element) {
+                    reportList.add(element.title);
+                    reportGenreList.add(element);
+                  });
+                }),
+                 _showReportDialog(Constants.genreTitleFilterText,_setGenre)
+                });
+              },
+            ),
             DropdownButton<SortItem>(
               onChanged: (SortItem value) {
                 if (currentFilter.sort!=value) {
@@ -136,23 +180,41 @@ class FiltersPageState extends State<FiltersPage> {
                 }
               },
               value: currentFilter!=null?currentFilter.sort:null,
-              hint: const Text(Constants.sortText),
+              hint: const Text(Constants.sortText, style: Constants.StyleFilterTextUnderline,),
               items: Constants.sortItems.map((SortItem item) {
                 return  DropdownMenuItem<SortItem>(
                   value: item,
                   child: Row(
                     children: <Widget>[
                       const SizedBox(width: 5,),
-                      Text(item.name,style:  const TextStyle(color: Constants.blackColor)),
+                      Text(item.name,style: Constants.StyleFilterTextUnderline),
                     ],
                   ),
                 );
               }).toList(),
             ),
             Container(height: 10,),
-            const Text(
-              'Years:',
-              style: TextStyle(decoration: TextDecoration.underline),
+            Text(
+              yearText,
+              style: Constants.StyleFilterText,
+            ),
+            MultiSelectChip(
+              lastYearsList,
+              onSelectionChanged: (selectedList) {
+                setState(() {
+                  if (selectedList.isNotEmpty) {
+                    selectedList.sort();
+                    currentFilter.minReleaseDate = int.parse(selectedList[0]);
+                    currentFilter.maxReleaseDate = int.parse(selectedList[selectedList.length-1]);
+                    yearText = currentFilter.minReleaseDate.toString()+' - '+currentFilter.maxReleaseDate.toString();
+                  }
+                  else {
+                    currentFilter.minReleaseDate = 1910;
+                    currentFilter.maxReleaseDate = yearNow;
+                    yearText = Constants.yearText;
+                  }
+                });
+              },
             ),
             Container(
               width: double.infinity,
@@ -164,21 +226,26 @@ class FiltersPageState extends State<FiltersPage> {
                       // based on individual definitions
                       // (see rangeSliders in _RangeSliderSampleState)
                       data: SliderTheme.of(context).copyWith(
-                        activeTrackColor: Constants.lightBlueColor,
+                        activeTrackColor: Constants.darkBlueColor,
+                        trackShape: RoundedRectSliderTrackShape(),
+                        trackHeight: 4.0,
+                        thumbShape: RoundSliderThumbShape(enabledThumbRadius: 12.0),
+                        thumbColor: Constants.darkBlueColor,
                         showValueIndicator: ShowValueIndicator.always,
                       ),
                       child: rnslider.RangeSlider(
-                        min: 2000.0,
-                        max: 2019.0,
-                        lowerValue: _minReleaseDate,
-                        upperValue: _maxReleaseDate,
-                        divisions: 18,
+                        min: 1910.0,
+                        max: yearNow.toDouble(),
+                        lowerValue:currentFilter==null||currentFilter.minReleaseDate==null?1910:currentFilter.minReleaseDate.toDouble(),
+                        upperValue:currentFilter==null||currentFilter.maxReleaseDate==null?yearNow.toDouble():currentFilter.maxReleaseDate.toDouble(),
+                        divisions: yearNow-1910,
                         showValueIndicator: true,
                         valueIndicatorMaxDecimals: 0,
                         onChanged: (double lower, double upper) {
                           setState(() {
-                            _minReleaseDate = lower;
-                            _maxReleaseDate = upper;
+                            yearText = lower.toInt().toString()+' - '+upper.toInt().toString();
+                            currentFilter.minReleaseDate = lower.toInt();
+                            currentFilter.maxReleaseDate = upper.toInt();
                           });
                         },
                       ),
@@ -189,17 +256,13 @@ class FiltersPageState extends State<FiltersPage> {
                       minWidth: 40.0,
                       maxWidth: 40.0,
                     ),
-                    child: Text('${_maxReleaseDate.toStringAsFixed(0)}'),
+                    child: Text('${currentFilter==null||currentFilter.maxReleaseDate==null?yearNow.toStringAsFixed(0):currentFilter.maxReleaseDate.toStringAsFixed(0)}'),
                   ),
                 ],
               ),
             ),
-
-            const Divider(),
-           // Genre Selector
-
-
-          ],
+       // Genre Selector
+         ],
         ),
       ),
 
@@ -226,14 +289,42 @@ class FiltersPageState extends State<FiltersPage> {
   /// This is ugly but to be considered as a study case.
   ///
   void _getFilterParameters() {
-    _movieBloc.outFilters.listen((MovieFilters filters){
-      currentFilter =  MovieFilters(
+    for (int i = yearNow; i > yearNow-5; i-- ){
+      lastYearsList.add(i.toString());
+    }
+    _movieBloc.outFilters.listen((MovieFilters filters) {
+      currentFilter = MovieFilters(
           minReleaseDate: filters.minReleaseDate,
           maxReleaseDate: filters.maxReleaseDate,
           sort: filters.sort,
-          genre: filters.genre);
+          genre: filters.genre,
+          studio: filters.studio);
+      if (mounted){
+        setState(() {
+          if (currentFilter.genre != null) {
+            selectedReportList.clear();
+            currentFilter.genre.forEach((element) {
+              selectedReportList.add(element.title);
+            });
+            genreText = selectedReportList.isNotEmpty
+                ? selectedReportList.join(" , ")
+                : Constants.genreFilterText;
+          }
+
+          if (currentFilter.studio != null) {
+            selectedReportList.clear();
+            currentFilter.studio.forEach((element) {
+              selectedReportList.add(element.text);
+            });
+            studioText = selectedReportList.isNotEmpty
+                ? selectedReportList.join(" , ")
+                : Constants.studioFilterText;
+          }
+        });
+      }
+
     });
-    // Now that we have all parameters, we may build the actual page
+
     if (mounted){
       setState((){
         _isInit = true;

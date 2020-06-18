@@ -84,7 +84,7 @@ class ListPage extends StatelessWidget {
           ),
         ],
       ),
-      endDrawer: const FiltersPage(),
+      endDrawer: FiltersPage(section:section),
     );
   }
 

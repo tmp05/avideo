@@ -17,6 +17,8 @@ class Constants {
   static const TextStyle Style14Text = TextStyle( fontSize: 14.0, color: whiteColor, fontWeight: FontWeight.bold);
   static const TextStyle StyleTextSeries = TextStyle( fontSize: 16.0, color: whiteColor,fontWeight: FontWeight.bold);
   static const TextStyle StyleTextUnderline = TextStyle( fontSize: 16.0, color: whiteColor,fontWeight: FontWeight.bold, decoration: TextDecoration.underline);
+  static const TextStyle StyleFilterText = TextStyle( fontSize: 16.0, color: darkBlueColor,fontWeight: FontWeight.bold);
+  static const TextStyle StyleFilterTextUnderline = TextStyle( fontSize: 16.0, color: darkBlueColor,fontWeight: FontWeight.bold, decoration: TextDecoration.underline);
 
   static const String enterText = 'Вход';
   static const String exitText = 'Выход';
@@ -29,8 +31,9 @@ class Constants {
   static const String serialText = 'СЕРИАЛЫ';
   static const String animeText = 'АНИМЕ';
   static const String customText = 'настройки';
-  static const String sortText = 'сортировка';
+  static const String sortText = 'Сортировка';
   static const String okText = 'OK';
+  static const String yearText = 'Год';
 
   static const String fieldIsNecessaryText ='Это поле обязательно для выполнения';
   static const String emailIsNecessaryText ='Без email авторизация невозможна';
@@ -62,6 +65,8 @@ class Constants {
 
   static const String genreFilterText = 'Жанр';
   static const String genreTitleFilterText = 'Выберите жанры';
+  static const String studioTitleFilterText = 'Выберите киностудии';
+  static const String studioFilterText = 'Киностудии';
 
   static const List<Item> items = <Item>[
     Item(Constants.profileMenuText,Icon(Icons.person)),
