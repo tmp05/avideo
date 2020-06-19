@@ -21,7 +21,9 @@ class FiltersSummary extends StatelessWidget {
           minReleaseDate: filters.minReleaseDate,
           maxReleaseDate: filters.maxReleaseDate,
           sort: filters.sort,
-          genre: filters.genre);
+          genre: filters.genre,
+          studio: filters.studio
+          );
     });
 
     return       Wrap(

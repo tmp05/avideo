@@ -17,8 +17,8 @@ class Constants {
   static const TextStyle Style14Text = TextStyle( fontSize: 14.0, color: whiteColor, fontWeight: FontWeight.bold);
   static const TextStyle StyleTextSeries = TextStyle( fontSize: 16.0, color: whiteColor,fontWeight: FontWeight.bold);
   static const TextStyle StyleTextUnderline = TextStyle( fontSize: 16.0, color: whiteColor,fontWeight: FontWeight.bold, decoration: TextDecoration.underline);
-  static const TextStyle StyleFilterText = TextStyle( fontSize: 16.0, color: darkBlueColor,fontWeight: FontWeight.bold);
-  static const TextStyle StyleFilterTextUnderline = TextStyle( fontSize: 16.0, color: darkBlueColor,fontWeight: FontWeight.bold, decoration: TextDecoration.underline);
+  static const TextStyle StyleFilterText = TextStyle( fontSize: 16.0, color: blackColor,fontWeight: FontWeight.bold);
+  static const TextStyle StyleFilterTextUnderline = TextStyle( fontSize: 16.0, color: blackColor,fontWeight: FontWeight.bold, decoration: TextDecoration.underline);
 
   static const String enterText = 'Вход';
   static const String exitText = 'Выход';

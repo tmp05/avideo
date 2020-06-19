@@ -2,9 +2,7 @@ import 'package:avideo/models/enums/video.dart';
 
 class VideoList {
   VideoList.fromJSON(List<dynamic> json)
-      : videos = json.map(
-          (dynamic i)=>Video.fromJSON(i)
-  ).toList();
+      : videos = json.map((dynamic i) => Video.fromJSON(i)).toList();
 
   List<Video> videos = <Video>[];
 

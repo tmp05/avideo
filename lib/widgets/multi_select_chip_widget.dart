@@ -42,8 +42,9 @@ class _MultiSelectChipState extends State<MultiSelectChip> {
 
   @override
   Widget build(BuildContext context) {
-    return Wrap(
+    return SingleChildScrollView (
+        child: Wrap(
       children: _buildChoiceList(),
-    );
+    ));
   }
 }
