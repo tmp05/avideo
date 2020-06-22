@@ -1,4 +1,3 @@
-import 'package:avideo/api/atoto_api.dart';
 import 'package:avideo/constants.dart';
 import 'package:avideo/models/enums/studios.dart';
 import 'package:avideo/widgets/filters/genre_filtre.dart';
@@ -82,33 +81,7 @@ class FiltersPageState extends State<FiltersPage> {
     });
   }
 
-  _showReportDialog(String text, Function toDo) {
-    showDialog(
-        context: context,
-        builder: (BuildContext context) {
-          //Here we will build the content of the dialog
-          return AlertDialog(
-            title: Text(text),
-            content: MultiSelectChip(
-              reportList,
-              onSelectionChanged: (selectedList) {
-                setState(() {
-                  selectedReportList = selectedList;
-                });
-              },
-            ),
-            actions: <Widget>[
-              InkWell(
-                child: const Text(Constants.okText),
-                onTap: () {
-                  toDo();
-                  Navigator.of(context).pop();
-                },
-              )
-            ],
-          );
-        });
-  }
+
 
   @override
   Widget build(BuildContext context) {
@@ -131,11 +104,11 @@ class FiltersPageState extends State<FiltersPage> {
           mainAxisAlignment: MainAxisAlignment.start,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: <Widget>[
-            StudioFilter(section:widget.section),
+            StudioFilter(section:widget.section,movieBloc: _movieBloc,),
             Container(
               height: 10,
             ),
-            GenreFilter(section:widget.section),
+            GenreFilter(section:widget.section,movieBloc: _movieBloc,),
             Container(
               height: 10,
             ),
@@ -155,6 +128,7 @@ class FiltersPageState extends State<FiltersPage> {
             ),
             MultiSelectChip(
               lastYearsList,
+              List(),
               onSelectionChanged: (selectedList) {
                 setState(() {
                   if (selectedList.isNotEmpty) {

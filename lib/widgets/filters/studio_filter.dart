@@ -9,9 +9,10 @@ import '../../constants.dart';
 import '../multi_select_chip_widget.dart';
 
 class StudioFilter extends StatefulWidget {
-  const StudioFilter({Key key, this.section}) : super(key: key);
+  const StudioFilter({Key key, this.section, this.movieBloc}) : super(key: key);
 
   final String section;
+  final MovieCatalogBloc movieBloc;
 
   @override
   StudioFilterState createState() {
@@ -28,7 +29,7 @@ class StudioFilterState extends State<StudioFilter> {
 
   MovieFilters _currentFilter;
 
-  _setStudio(MovieCatalogBloc _movieBloc) {
+  _setStudio() {
     setState(() {
       if (selectedReportList.isNotEmpty) {
         selectedStudiosReportList.clear();
@@ -37,20 +38,28 @@ class StudioFilterState extends State<StudioFilter> {
               reportStudiosList.firstWhere((Studios g) => g.text == element));
         });
         _currentFilter.studio = selectedStudiosReportList;
-        _movieBloc.inFilters.add(_currentFilter);
+        widget.movieBloc.inFilters.add(_currentFilter);
       }
     });
   }
 
-  _clearStudio(MovieCatalogBloc _movieBloc) {
+  _clearStudio() {
     setState(() {
-      _currentFilter.studio= List<Studios>();
-      _movieBloc.inFilters.add(_currentFilter);
+      _currentFilter.studio = List<Studios>();
+      selectedReportList = List();
+      widget.movieBloc.inFilters.add(_currentFilter);
     });
   }
 
+  _clearItem(Studios studio) {
+    setState(() {
+      _currentFilter.studio.remove(studio);
+      selectedReportList.remove(studio.text);
+      widget.movieBloc.inFilters.add(_currentFilter);
+    });
+  }
 
-  _showReportDialog(String text, MovieCatalogBloc _movieBloc) {
+  _showReportDialog(String text) {
     showDialog(
         context: context,
         builder: (BuildContext context) {
@@ -59,6 +68,7 @@ class StudioFilterState extends State<StudioFilter> {
             title: Text(text),
             content: MultiSelectChip(
               reportList,
+              selectedReportList,
               onSelectionChanged: (selectedList) {
                 setState(() {
                   selectedReportList = selectedList;
@@ -69,7 +79,7 @@ class StudioFilterState extends State<StudioFilter> {
               InkWell(
                 child: const Text(Constants.okText),
                 onTap: () {
-                  _setStudio(_movieBloc);
+                  _setStudio();
                   Navigator.of(context).pop();
                 },
               )
@@ -86,12 +96,27 @@ class StudioFilterState extends State<StudioFilter> {
     return stringList.join(" , ");
   }
 
+  onPressed() {
+    AtotoApi().movieStudios(widget.section).then((value) => {
+          reportList.clear(),
+          reportStudiosList.clear(),
+          setState(() {
+            value.studios.forEach((element) {
+              reportList.add(element.text);
+              reportStudiosList.add(element);
+            });
+          }),
+          _showReportDialog(Constants.studioTitleFilterText)
+        });
+  }
+
   @override
   Widget build(BuildContext context) {
     final MovieCatalogBloc movieBloc =
-    BlocProvider.of<MovieCatalogBloc>(context);
+        BlocProvider.of<MovieCatalogBloc>(context);
 
-    return Row(
+    return ListView(
+      shrinkWrap: true,
       children: <Widget>[
         StreamBuilder<MovieFilters>(
             stream: movieBloc.outFilters,
@@ -107,36 +132,68 @@ class StudioFilterState extends State<StudioFilter> {
                   studio: snapshot.data.studio,
                   sort: snapshot.data.sort,
                 );
-              return       Flexible(
-                  child: InkWell(
-                    child: Text(
-                      snapshot.data == null || snapshot.data.studio == null || snapshot.data.studio.length==0
-                          ? Constants.studioFilterText
-                          : convertStudiosToString(snapshot.data.studio),
-                      style: Constants.StyleFilterTextUnderline,
-                    ),
-                    onTap: () {
-                      AtotoApi().movieStudios(widget.section).then((value) => {
-                        reportList.clear(),
-                        reportStudiosList.clear(),
-                        setState(() {
-                          value.studios.forEach((element) {
-                            reportList.add(element.text);
-                            reportStudiosList.add(element);
-                          });
-                        }),
-                        _showReportDialog(Constants.studioTitleFilterText, movieBloc)
-                      });
-                    },
-                  ));
-            }),
-        InkWell(
-            child:
-            const Icon(Icons.clear, color: Constants.darkBlueColor),
-            onTap: () {
-              _clearStudio(movieBloc);
+              if (snapshot.data == null ||
+                  snapshot.data.studio == null ||
+                  snapshot.data.studio.length == 0)
+                return textStudio();
+              else
+                return SingleChildScrollView(
+                    child: Wrap(
+                  children: _buildStudioList(snapshot.data.studio),
+                ));
             }),
       ],
     );
+  }
+
+  Widget textStudio() {
+    return Container(
+        width: 150,
+        child:     Row(
+          children: <Widget>[
+         Container(
+            decoration: new BoxDecoration(
+              color: Constants.lightBlueColor,
+              borderRadius: new BorderRadius.only(
+                  topRight: Radius.circular(20.0),
+                  bottomRight: Radius.circular(20.0)),
+              border: new Border.all(color: Color.fromRGBO(0, 0, 0, 0.0)),
+            ),
+            child: ActionChip(
+              labelPadding: EdgeInsets.all(2.0),
+              shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.only(
+                      topRight: Radius.circular(20),
+                      bottomRight: Radius.circular(20))),
+              label: Text(
+                Constants.studioFilterText,
+                style: Constants.StyleFilterText,
+              ),
+              onPressed: () => onPressed(),
+            )),
+            InkWell(
+                child: const Icon(Icons.clear, color: Constants.darkBlueColor),
+                onTap: () {
+                  _clearStudio();
+                }),
+          ]));
+  }
+
+  _buildStudioList(List<Studios> studioList) {
+    List<Widget> _studioChoices = List();
+    _studioChoices.add(textStudio());
+    studioList.forEach((item) {
+      _studioChoices.add(Container(
+          padding: const EdgeInsets.all(1.0),
+          child: ActionChip(
+            labelPadding: EdgeInsets.all(2.0),
+            avatar: CircleAvatar(
+                backgroundColor: Constants.lightBlueColor,
+                child: const Icon(Icons.clear)),
+            label: Text(item.text.toString()),
+            onPressed: () => _clearItem(item),
+          )));
+    });
+    return _studioChoices;
   }
 }

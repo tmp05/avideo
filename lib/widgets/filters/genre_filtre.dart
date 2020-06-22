@@ -1,5 +1,4 @@
 import 'package:avideo/api/atoto_api.dart';
-import 'package:avideo/blocs/bloc_provider.dart';
 import 'package:avideo/blocs/movie_catalog_bloc.dart';
 import 'package:avideo/models/enums/genre.dart';
 import 'package:avideo/models/filters.dart';
@@ -9,9 +8,10 @@ import '../../constants.dart';
 import '../multi_select_chip_widget.dart';
 
 class GenreFilter extends StatefulWidget {
-  const GenreFilter({Key key, this.section}) : super(key: key);
+  const GenreFilter({Key key, this.section, this.movieBloc}) : super(key: key);
 
   final String section;
+  final MovieCatalogBloc movieBloc;
 
   @override
   GenreFilterState createState() {
@@ -28,14 +28,22 @@ class GenreFilterState extends State<GenreFilter> {
 
   MovieFilters _currentFilter;
 
-  _clearGenre(MovieCatalogBloc _movieBloc) {
+  _clearGenre() {
     setState(() {
-      _currentFilter.genre= List<Genre>();
-      _movieBloc.inFilters.add(_currentFilter);
+      _currentFilter.genre = List<Genre>();
+      widget.movieBloc.inFilters.add(_currentFilter);
     });
   }
 
-  _setGenre(MovieCatalogBloc _movieBloc) {
+  _clearItem(Genre genre) {
+    setState(() {
+      _currentFilter.genre.remove(genre);
+      selectedReportList.remove(genre.text);
+      widget.movieBloc.inFilters.add(_currentFilter);
+    });
+  }
+
+  _setGenre() {
     setState(() {
       if (selectedReportList.isNotEmpty) {
         selectedGenreReportList.clear();
@@ -44,12 +52,12 @@ class GenreFilterState extends State<GenreFilter> {
               .add(reportGenreList.firstWhere((Genre g) => g.text == element));
         });
         _currentFilter.genre = selectedGenreReportList;
-        _movieBloc.inFilters.add(_currentFilter);
+        widget.movieBloc.inFilters.add(_currentFilter);
       }
     });
   }
 
-  _showReportDialog(String text, MovieCatalogBloc _movieBloc) {
+  _showReportDialog(String text) {
     showDialog(
         context: context,
         builder: (BuildContext context) {
@@ -58,6 +66,7 @@ class GenreFilterState extends State<GenreFilter> {
             title: Text(text),
             content: MultiSelectChip(
               reportList,
+              selectedReportList,
               onSelectionChanged: (selectedList) {
                 setState(() {
                   selectedReportList = selectedList;
@@ -68,7 +77,7 @@ class GenreFilterState extends State<GenreFilter> {
               InkWell(
                 child: const Text(Constants.okText),
                 onTap: () {
-                  _setGenre(_movieBloc);
+                  _setGenre();
                   Navigator.of(context).pop();
                 },
               )
@@ -85,15 +94,45 @@ class GenreFilterState extends State<GenreFilter> {
     return stringList.join(" , ");
   }
 
+  onPressed() {
+    AtotoApi().movieGenres(section: widget.section).then((value) => {
+          reportList.clear(),
+          reportGenreList.clear(),
+          setState(() {
+            value.genres.forEach((element) {
+              reportList.add(element.text);
+              reportGenreList.add(element);
+            });
+          }),
+          _showReportDialog(Constants.genreTitleFilterText)
+        });
+  }
+
+  _buildGenreList(List<Genre> genreList) {
+    List<Widget> _genreChoices = List();
+    _genreChoices.add(textGenre());
+    genreList.forEach((item) {
+      _genreChoices.add(Container(
+          padding: const EdgeInsets.all(1.0),
+          child: ActionChip(
+            labelPadding: EdgeInsets.all(2.0),
+            avatar: CircleAvatar(
+                backgroundColor: Constants.lightBlueColor,
+                child: const Icon(Icons.clear)),
+            label: Text(item.text.toString()),
+            onPressed: () => _clearItem(item),
+          )));
+    });
+    return _genreChoices;
+  }
+
   @override
   Widget build(BuildContext context) {
-    final MovieCatalogBloc movieBloc =
-        BlocProvider.of<MovieCatalogBloc>(context);
-
-    return Row(
+    return ListView(
+      shrinkWrap: true,
       children: <Widget>[
         StreamBuilder<MovieFilters>(
-            stream: movieBloc.outFilters,
+            stream: widget.movieBloc.outFilters,
             builder:
                 (BuildContext context, AsyncSnapshot<MovieFilters> snapshot) {
               if (snapshot.data != null)
@@ -106,39 +145,49 @@ class GenreFilterState extends State<GenreFilter> {
                   studio: snapshot.data.studio,
                   sort: snapshot.data.sort,
                 );
-              return       Flexible(
-                    child: InkWell(
-                  child: Text(
-                    snapshot.data == null || snapshot.data.genre == null || snapshot.data.genre.length==0
-                        ? Constants.genreFilterText
-                        : convertGenresToString(snapshot.data.genre),
-                    style: Constants.StyleFilterTextUnderline,
-                  ),
-                  onTap: () {
-                    AtotoApi()
-                        .movieGenres(section: widget.section)
-                        .then((value) => {
-                              reportList.clear(),
-                              reportGenreList.clear(),
-                              setState(() {
-                                value.genres.forEach((element) {
-                                  reportList.add(element.text);
-                                  reportGenreList.add(element);
-                                });
-                              }),
-                              _showReportDialog(
-                                  Constants.genreTitleFilterText, movieBloc)
-                            });
-                  },
+              if (snapshot.data == null ||
+                  snapshot.data.genre == null ||
+                  snapshot.data.genre.length == 0)
+                return textGenre();
+              else
+                return SingleChildScrollView(
+                    child: Wrap(
+                  children: _buildGenreList(snapshot.data.genre),
                 ));
-            }),
-        InkWell(
-            child:
-            const Icon(Icons.clear, color: Constants.darkBlueColor),
-            onTap: () {
-              _clearGenre(movieBloc);
             }),
       ],
     );
+  }
+
+  Widget textGenre() {
+    return Container(
+        width: 150,
+        child: Row(children: <Widget>[
+          Container(
+              decoration: new BoxDecoration(
+                color: Constants.lightBlueColor,
+                borderRadius: new BorderRadius.only(
+                    topRight: Radius.circular(20.0),
+                    bottomRight: Radius.circular(20.0)),
+                border: new Border.all(color: Color.fromRGBO(0, 0, 0, 0.0)),
+              ),
+              child: ActionChip(
+                labelPadding: EdgeInsets.all(2.0),
+                shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.only(
+                        topRight: Radius.circular(20),
+                        bottomRight: Radius.circular(20))),
+                label: Text(
+                  Constants.genreFilterText,
+                  style: Constants.StyleFilterText,
+                ),
+                onPressed: () => onPressed(),
+              )),
+          InkWell(
+              child: const Icon(Icons.clear, color: Constants.darkBlueColor),
+              onTap: () {
+                _clearGenre();
+              }),
+        ]));
   }
 }
