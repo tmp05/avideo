@@ -10,52 +10,58 @@ import 'package:avideo/pages/auth/login.dart';
 import 'package:avideo/pages/list.dart';
 
 class MainMenuWidget extends StatelessWidget {
-  const MainMenuWidget( {
-    Key key
-  }) : super(key: key);
+  const MainMenuWidget({Key key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
-    return
-        Wrap(
-            spacing: 6.0,
-            runSpacing: 6.0,
-          children:           <Widget>[
-            actionChips(Constants.filmText, const Icon(Icons.computer), 'movie',  context),
-            actionChips(Constants.serialText, const Icon(Icons.view_headline),'series',context),
-            actionChips(Constants.animeText, const Icon(Icons.view_headline),'anime',context),
-            Container(
-            padding: const EdgeInsets.symmetric(horizontal: 10.0),
-            decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(15.0),
-            border: Border.all(
-            color: Colors.white, style: BorderStyle.solid, width: 1),
-            ),
-            child:  DropdownButton<Item>(
-                 onChanged: ( Item value) {
-                   _actionItem(value.name, context);
-                 },
-                 hint: const Text(Constants.customText),
-                     items: Constants.items.map((Item item) {
-                   return  DropdownMenuItem<Item>(
-                     value: item,
-                     child: Row(
-                   children: <Widget>[
-                   item.icon,
-                   const SizedBox(width: 5,),
-                   Text(item.name,style:  const TextStyle(color: Constants.blackColor)),
-                   ],
-                     ),
-                   );
-                 }).toList(),
-               )),
-        ],);
-
-
-
+    return Wrap(
+      spacing: 6.0,
+      runSpacing: 6.0,
+      children: <Widget>[
+        actionChips(
+            Constants.filmText, const Icon(Icons.computer), 'movie', context),
+        actionChips(Constants.serialText, const Icon(Icons.view_headline),
+            'series', context),
+        actionChips(Constants.animeText, const Icon(Icons.view_headline),
+            'anime', context),
+        dropDownMenu(context),
+      ],
+    );
   }
 
-  Widget actionChips(String text, Icon icon, String section, BuildContext context) {
+  Widget dropDownMenu(BuildContext context) {
+    return Container(
+        padding: const EdgeInsets.symmetric(horizontal: 10.0),
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(15.0),
+          border: Border.all(
+              color: Colors.white, style: BorderStyle.solid, width: 1),
+        ),
+        child: DropdownButton<Item>(
+          onChanged: (Item value) {
+            _actionItem(value.name, context);
+          },
+          hint: const Text(Constants.customText),
+          items: Constants.items.map((Item item) {
+            return DropdownMenuItem<Item>(
+              value: item,
+              child: Row(
+                children: <Widget>[
+                  item.icon,
+                  const SizedBox(
+                    width: 5,
+                  ),
+                  Text(item.name,
+                      style: const TextStyle(color: Constants.blackColor)),
+                ],
+              ),
+            );
+          }).toList(),
+        ));
+  }
+
+  Widget actionChips(
+      String text, Icon icon, String section, BuildContext context) {
     return ActionChip(
       elevation: 6.0,
       avatar: CircleAvatar(
@@ -71,40 +77,42 @@ class MainMenuWidget extends StatelessWidget {
   }
 
   void _openPage(String section, BuildContext context) {
-    Navigator
-        .of(context)
+    Navigator.of(context)
         .push(MaterialPageRoute<void>(builder: (BuildContext context) {
       return BlocProvider<MovieCatalogBloc>(
         bloc: MovieCatalogBloc(),
-        child: ListPage(section:section),
+        child: ListPage(section: section),
       );
     }));
   }
 
   void _actionItem(String name, BuildContext context) {
-    switch (name){
+    switch (name) {
       case Constants.profileMenuText:
-        Navigator
-            .of(context)
+        Navigator.of(context)
             .push(MaterialPageRoute<void>(builder: (BuildContext context) {
           return BlocProvider<MovieCatalogBloc>(
             bloc: MovieCatalogBloc(),
-            child: HomePage(nameController: TextEditingController(), passwordController: TextEditingController()),
+            child: HomePage(
+                nameController: TextEditingController(),
+                passwordController: TextEditingController()),
           );
         }));
         break;
       case Constants.exitText:
-        AtotoApi().logOut().then((bool onValue){
+        AtotoApi().logOut().then((bool onValue) {
           if (onValue)
-                Navigator.of(context)
+            Navigator.of(context)
                 .push(MaterialPageRoute<void>(builder: (BuildContext context) {
-                  final AuthBloc authBloc = BlocProvider.of<AuthBloc>(context);
-                  authBloc.addError(null);
-                  return LoginPage(nameController: TextEditingController(),passwordController: TextEditingController(),);
-                }));
+              final AuthBloc authBloc = BlocProvider.of<AuthBloc>(context);
+              authBloc.addError(null);
+              return LoginPage(
+                nameController: TextEditingController(),
+                passwordController: TextEditingController(),
+              );
+            }));
         });
         break;
     }
-
   }
 }

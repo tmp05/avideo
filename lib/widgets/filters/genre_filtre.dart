@@ -161,7 +161,7 @@ class GenreFilterState extends State<GenreFilter> {
 
   Widget textGenre() {
     return Container(
-        width: 150,
+        width: 100,
         child: Row(children: <Widget>[
           Container(
               decoration: new BoxDecoration(

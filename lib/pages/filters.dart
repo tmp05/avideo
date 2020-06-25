@@ -3,10 +3,8 @@ import 'package:avideo/models/enums/studios.dart';
 import 'package:avideo/widgets/filters/genre_filtre.dart';
 import 'package:avideo/widgets/filters/sort_item.dart';
 import 'package:avideo/widgets/filters/studio_filter.dart';
-import 'package:avideo/widgets/multi_select_chip_widget.dart';
+import 'package:avideo/widgets/filters/years_item.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_range_slider/flutter_range_slider.dart'
-    as rnslider; //take it away!! https://medium.com/flutter/material-range-slider-in-flutter-a285c6e3447d
 import 'package:avideo/blocs/bloc_provider.dart';
 import 'package:avideo/blocs/movie_catalog_bloc.dart';
 import 'package:avideo/models/filters.dart';
@@ -72,17 +70,6 @@ class FiltersPageState extends State<FiltersPage> {
 
 
 
-
-  _clearYears() {
-    setState(() {
-      yearText = Constants.yearText;
-      currentFilter.maxReleaseDate = null;
-      currentFilter.minReleaseDate = null;
-    });
-  }
-
-
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -104,105 +91,25 @@ class FiltersPageState extends State<FiltersPage> {
           mainAxisAlignment: MainAxisAlignment.start,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: <Widget>[
-            StudioFilter(section:widget.section,movieBloc: _movieBloc,),
+            StudioFilter(
+              section: widget.section,
+              movieBloc: _movieBloc,
+            ),
             Container(
               height: 10,
             ),
-            GenreFilter(section:widget.section,movieBloc: _movieBloc,),
+            GenreFilter(
+              section: widget.section,
+              movieBloc: _movieBloc,
+            ),
             Container(
               height: 10,
             ),
-            Row(
-              children: <Widget>[
-                Text(
-                  yearText,
-                  style: Constants.StyleFilterText,
-                ),
-                InkWell(
-                    child:
-                        const Icon(Icons.clear, color: Constants.darkBlueColor),
-                    onTap: () {
-                      _clearYears();
-                    }),
-              ],
+            YearFilter(
+              section: widget.section,
+              movieBloc: _movieBloc,
             ),
-            MultiSelectChip(
-              lastYearsList,
-              List(),
-              onSelectionChanged: (selectedList) {
-                setState(() {
-                  if (selectedList.isNotEmpty) {
-                    selectedList.sort();
-                    currentFilter.minReleaseDate = int.parse(selectedList[0]);
-                    currentFilter.maxReleaseDate =
-                        int.parse(selectedList[selectedList.length - 1]);
-                    yearText = currentFilter.minReleaseDate.toString() +
-                        ' - ' +
-                        currentFilter.maxReleaseDate.toString();
-                  } else {
-                    currentFilter.minReleaseDate = 1910;
-                    currentFilter.maxReleaseDate = yearNow;
-                    yearText = Constants.yearText;
-                  }
-                });
-              },
-            ),
-            Container(
-              width: double.infinity,
-              child: Row(
-                children: <Widget>[
-                  Expanded(
-                    child: SliderTheme(
-                      // Customization of the SliderTheme
-                      // based on individual definitions
-                      // (see rangeSliders in _RangeSliderSampleState)
-                      data: SliderTheme.of(context).copyWith(
-                        activeTrackColor: Constants.darkBlueColor,
-                        trackShape: RoundedRectSliderTrackShape(),
-                        trackHeight: 4.0,
-                        thumbShape:
-                            RoundSliderThumbShape(enabledThumbRadius: 12.0),
-                        thumbColor: Constants.darkBlueColor,
-                        showValueIndicator: ShowValueIndicator.always,
-                      ),
-                      child: rnslider.RangeSlider(
-                        min: 1910.0,
-                        max: yearNow.toDouble(),
-                        lowerValue: currentFilter == null ||
-                                currentFilter.minReleaseDate == null
-                            ? 1910
-                            : currentFilter.minReleaseDate.toDouble(),
-                        upperValue: currentFilter == null ||
-                                currentFilter.maxReleaseDate == null
-                            ? yearNow.toDouble()
-                            : currentFilter.maxReleaseDate.toDouble(),
-                        divisions: yearNow - 1910,
-                        showValueIndicator: true,
-                        valueIndicatorMaxDecimals: 0,
-                        onChanged: (double lower, double upper) {
-                          setState(() {
-                            yearText = lower.toInt().toString() +
-                                ' - ' +
-                                upper.toInt().toString();
-                            currentFilter.minReleaseDate = lower.toInt();
-                            currentFilter.maxReleaseDate = upper.toInt();
-                          });
-                        },
-                      ),
-                    ),
-                  ),
-                  Container(
-                    constraints: const BoxConstraints(
-                      minWidth: 40.0,
-                      maxWidth: 40.0,
-                    ),
-                    child: Text(
-                        '${currentFilter == null || currentFilter.maxReleaseDate == null ? yearNow.toStringAsFixed(0) : currentFilter.maxReleaseDate.toStringAsFixed(0)}'),
-                  ),
-                ],
-              ),
-            ),
-           SortItemWidget()
+            SortItemWidget()
             // Genre Selector
           ],
         ),

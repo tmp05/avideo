@@ -38,13 +38,6 @@ class ListPage extends StatelessWidget {
       _scaffoldKey.currentState.openEndDrawer();
     }
 
-    String _getStringFromList(List<dynamic> list){
-      List<String> stringList = List();
-      list.forEach((element) {
-        stringList.add(element.text);
-      });
-      return stringList.join(" , ");
-   }
 
     return Scaffold(
       key: _scaffoldKey,
@@ -53,29 +46,18 @@ class ListPage extends StatelessWidget {
         children: <Widget>[
           const MainMenuWidget(),
           //      const FiltersSummary(),
-          StreamBuilder<MovieFilters>(
+          Align (
+              alignment: Alignment.topRight,
+              child: StreamBuilder<MovieFilters>(
               stream: movieBloc.outFilters,
               builder:
                   (BuildContext context, AsyncSnapshot<MovieFilters> snapshot) {
-
-
-                String filterText = 'Отборы'+"\n";
-                if (snapshot.data != null) {
-                  if (snapshot.data.studio != null)
-                    filterText =
-                        filterText = filterText +'Киностудия: '+_getStringFromList(snapshot.data.studio)+ "\n";
-                  if (snapshot.data.genre != null)
-                    filterText = filterText +'Жанр: '+_getStringFromList(snapshot.data.genre)+ "\n";
-                  if (snapshot.data.minReleaseDate!= null&&snapshot.data.maxReleaseDate!= null)
-                    filterText =
-                        filterText = filterText +'Год: '+snapshot.data.minReleaseDate.toString()+"-"+snapshot.data.maxReleaseDate.toString()+ "\n";
-                  if (snapshot.data.sort!=null)
-                    filterText =
-                        filterText = filterText +'Сортировка: '+snapshot.data.sort.name;
-                }
+                if (_dataHasFiltres(snapshot.data))
                 return InkWell(
-                    child: Text(filterText,style: Constants.StyleFilterTextUnderline), onTap: () => _openEndDrawer());
-              }),
+                    child: Text('Установлены фильтры',style: Constants.StyleAlertFilterTextUnderline), onTap: () => _openEndDrawer());
+                else return InkWell(
+                    child: Text('Фильтры',style: Constants.StyleNoFilterTextUnderline), onTap: () => _openEndDrawer());
+              })),
           Expanded(
             // Display an infinite GridView with the list of all movies in the catalog,
             // that meet the filters
@@ -99,10 +81,19 @@ class ListPage extends StatelessWidget {
           ),
         ],
       ),
-      endDrawer: FiltersPage(section: section),
+      endDrawer:FiltersPage(section: section,)
     );
   }
 
+  bool _dataHasFiltres(MovieFilters filter){
+    bool hasFilters = false;
+    if (filter!=null) {
+      if (filter.genre!=null&&filter.genre.length>0) hasFilters=true;
+      if (filter.studio!=null&&filter.studio.length>0) hasFilters=true;
+      if (filter.maxReleaseDate!=null&&filter.minReleaseDate!=null&&(filter.maxReleaseDate<DateTime.now().year||filter.minReleaseDate>1910)) hasFilters=true;
+    }
+    return hasFilters;
+  }
   Widget _buildMovieCard(
       BuildContext context,
       MovieCatalogBloc movieBloc,

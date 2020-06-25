@@ -43,8 +43,6 @@ class _MultiSelectChipState extends State<MultiSelectChip> {
     if (selectedChoices.length==0) setState(() {
       selectedChoices = widget.selectedReportList.toList();
     });
-    print('now we rebuild and have in selectedChoices items= '+selectedChoices.length.toString());
-    print('now we rebuild and have in selectedReportList items= '+widget.selectedReportList.length.toString());
     return Wrap(
       children: _buildChoiceList(),
     );

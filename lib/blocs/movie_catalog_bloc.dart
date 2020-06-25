@@ -192,6 +192,7 @@ class MovieCatalogBloc implements BlocBase {
         // the page has NOT yet been fetched, so we need to
         // fetch it from Internet
         // (except if we are already currently fetching it)
+        print('_minReleaseDate is '+_minReleaseDate.toString());
         if (!_pagesBeingFetched.contains(pageIndex)) {
           // Remember that we are fetching it
           _pagesBeingFetched.add(pageIndex);

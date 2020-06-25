@@ -12,6 +12,7 @@ class Constants {
   static const Color greenColor = Colors.green;
   static const Color grayColor = Color(0xFFA1A1A1);
   static const Color orangeColor = Colors.deepOrange;
+  static const Color alertColor = Colors.red;
 
   static const TextStyle Style18Text = TextStyle( fontSize: 18.0, color: whiteColor, fontWeight: FontWeight.bold);
   static const TextStyle Style14Text = TextStyle( fontSize: 14.0, color: whiteColor, fontWeight: FontWeight.bold);
@@ -19,6 +20,8 @@ class Constants {
   static const TextStyle StyleTextUnderline = TextStyle( fontSize: 16.0, color: whiteColor,fontWeight: FontWeight.bold, decoration: TextDecoration.underline);
   static const TextStyle StyleFilterText = TextStyle( fontSize: 16.0, color: blackColor,fontWeight: FontWeight.bold);
   static const TextStyle StyleFilterTextUnderline = TextStyle( fontSize: 16.0, color: blackColor,fontWeight: FontWeight.bold, decoration: TextDecoration.underline);
+  static const TextStyle StyleAlertFilterTextUnderline = TextStyle( fontSize: 16.0, color: alertColor,fontWeight: FontWeight.bold, decoration: TextDecoration.underline);
+  static const TextStyle StyleNoFilterTextUnderline = TextStyle( fontSize: 16.0, color: greenColor,fontWeight: FontWeight.bold, decoration: TextDecoration.underline);
 
   static const String enterText = 'Вход';
   static const String exitText = 'Выход';
