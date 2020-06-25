@@ -7,6 +7,7 @@ import 'package:flutter/material.dart';
 
 import '../../constants.dart';
 import '../multi_select_chip_widget.dart';
+import 'adds.dart';
 
 class StudioFilter extends StatefulWidget {
   const StudioFilter({Key key, this.section, this.movieBloc}) : super(key: key);
@@ -123,15 +124,7 @@ class StudioFilterState extends State<StudioFilter> {
             builder:
                 (BuildContext context, AsyncSnapshot<MovieFilters> snapshot) {
               if (snapshot.data != null)
-                _currentFilter = MovieFilters(
-                  minReleaseDate: snapshot.data.minReleaseDate,
-                  maxReleaseDate: snapshot.data.maxReleaseDate,
-                  genre: snapshot.data.genre,
-                  year: snapshot.data.year,
-                  country: snapshot.data.country,
-                  studio: snapshot.data.studio,
-                  sort: snapshot.data.sort,
-                );
+                _currentFilter = Adds().copyFilter(snapshot.data);
               if (snapshot.data == null ||
                   snapshot.data.studio == null ||
                   snapshot.data.studio.length == 0)

@@ -1,58 +1,60 @@
 import 'package:avideo/api/atoto_api.dart';
 import 'package:avideo/blocs/movie_catalog_bloc.dart';
-import 'package:avideo/models/enums/genre.dart';
+import 'package:avideo/models/enums/country.dart';
 import 'package:avideo/models/filters.dart';
-import 'package:avideo/widgets/filters/adds.dart';
+
 import 'package:flutter/material.dart';
 
 import '../../constants.dart';
 import '../multi_select_chip_widget.dart';
 
-class GenreFilter extends StatefulWidget {
-  const GenreFilter({Key key, this.section, this.movieBloc}) : super(key: key);
+import 'package:avideo/widgets/filters/adds.dart';
+
+class CountryFilter extends StatefulWidget {
+  const CountryFilter({Key key, this.section, this.movieBloc}) : super(key: key);
 
   final String section;
   final MovieCatalogBloc movieBloc;
 
   @override
-  GenreFilterState createState() {
-    return GenreFilterState();
+  CountryFilterState createState() {
+    return CountryFilterState();
   }
 }
 
-class GenreFilterState extends State<GenreFilter> {
+class CountryFilterState extends State<CountryFilter> {
   List<String> reportList = List();
   List<String> selectedReportList = List();
 
-  List<Genre> reportGenreList = List();
-  List<Genre> selectedGenreReportList = List();
+  List<Country> reportCountryList = List();
+  List<Country> selectedCountryReportList = List();
 
   MovieFilters _currentFilter;
 
-  _clearGenre() {
+  _clearCountry() {
     setState(() {
-      _currentFilter.genre = List<Genre>();
+      _currentFilter.country = List<Country>();
       widget.movieBloc.inFilters.add(_currentFilter);
     });
   }
 
-  _clearItem(Genre genre) {
+  _clearItem(Country country) {
     setState(() {
-      _currentFilter.genre.remove(genre);
-      selectedReportList.remove(genre.text);
+      _currentFilter.country.remove(country);
+      selectedReportList.remove(country.text);
       widget.movieBloc.inFilters.add(_currentFilter);
     });
   }
 
-  _setGenre() {
+  _setCountry() {
     setState(() {
       if (selectedReportList.isNotEmpty) {
-        selectedGenreReportList.clear();
+        selectedCountryReportList.clear();
         selectedReportList.forEach((element) {
-          selectedGenreReportList
-              .add(reportGenreList.firstWhere((Genre g) => g.text == element));
+          selectedCountryReportList
+              .add(reportCountryList.firstWhere((Country c) => c.text == element));
         });
-        _currentFilter.genre = selectedGenreReportList;
+        _currentFilter.country = selectedCountryReportList;
         widget.movieBloc.inFilters.add(_currentFilter);
       }
     });
@@ -78,7 +80,7 @@ class GenreFilterState extends State<GenreFilter> {
               InkWell(
                 child: const Text(Constants.okText),
                 onTap: () {
-                  _setGenre();
+                  _setCountry();
                   Navigator.of(context).pop();
                 },
               )
@@ -87,7 +89,7 @@ class GenreFilterState extends State<GenreFilter> {
         });
   }
 
-  String convertGenresToString(List<Genre> data) {
+  String convertCountriesToString(List<Country> data) {
     List<String> stringList = List();
     data.forEach((element) {
       stringList.add(element.text);
@@ -96,25 +98,24 @@ class GenreFilterState extends State<GenreFilter> {
   }
 
   onPressed() {
-
-    AtotoApi().movieGenres(section: widget.section).then((value) => {
-          reportList.clear(),
-          reportGenreList.clear(),
-          setState(() {
-            value.genres.forEach((element) {
-              reportList.add(element.text);
-              reportGenreList.add(element);
-            });
-          }),
-          _showReportDialog(Constants.genreTitleFilterText)
+    AtotoApi().movieCountries(widget.section).then((value) => {
+      reportList.clear(),
+      reportCountryList.clear(),
+      setState(() {
+        value.countries.forEach((element) {
+          reportList.add(element.text);
+          reportCountryList.add(element);
         });
+      }),
+      _showReportDialog(Constants.countryFilterText)
+    });
   }
 
-  _buildGenreList(List<Genre> genreList) {
-    List<Widget> _genreChoices = List();
-    _genreChoices.add(textGenre());
-    genreList.forEach((item) {
-      _genreChoices.add(Container(
+  _buildCountryList(List<Country> countryList) {
+    List<Widget> _countryChoices = List();
+    _countryChoices.add(textCountry());
+    countryList.forEach((item) {
+      _countryChoices.add(Container(
           padding: const EdgeInsets.all(1.0),
           child: ActionChip(
             labelPadding: EdgeInsets.all(2.0),
@@ -125,7 +126,7 @@ class GenreFilterState extends State<GenreFilter> {
             onPressed: () => _clearItem(item),
           )));
     });
-    return _genreChoices;
+    return _countryChoices;
   }
 
   @override
@@ -140,20 +141,20 @@ class GenreFilterState extends State<GenreFilter> {
               if (snapshot.data != null)
                 _currentFilter = Adds().copyFilter(snapshot.data);
               if (snapshot.data == null ||
-                  snapshot.data.genre == null ||
-                  snapshot.data.genre.length == 0)
-                return textGenre();
+                  snapshot.data.country == null ||
+                  snapshot.data.country.length == 0)
+                return textCountry();
               else
                 return SingleChildScrollView(
                     child: Wrap(
-                  children: _buildGenreList(snapshot.data.genre),
-                ));
+                      children: _buildCountryList(snapshot.data.country),
+                    ));
             }),
       ],
     );
   }
 
-  Widget textGenre() {
+  Widget textCountry() {
     return Container(
         width: 100,
         child: Row(children: <Widget>[
@@ -172,7 +173,7 @@ class GenreFilterState extends State<GenreFilter> {
                         topRight: Radius.circular(20),
                         bottomRight: Radius.circular(20))),
                 label: Text(
-                  Constants.genreFilterText,
+                  Constants.countryFilterText,
                   style: Constants.StyleFilterText,
                 ),
                 onPressed: () => onPressed(),
@@ -180,7 +181,7 @@ class GenreFilterState extends State<GenreFilter> {
           InkWell(
               child: const Icon(Icons.clear, color: Constants.darkBlueColor),
               onTap: () {
-                _clearGenre();
+                _clearCountry();
               }),
         ]));
   }

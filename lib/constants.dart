@@ -65,11 +65,14 @@ class Constants {
   static const String referalMenuText = 'Реферальная система';
   static const String devicesMenuText = 'Привязка устройств';
   static const String listFilterText = 'Настройка списка';
+  static const String searchText = 'Поиск';
 
   static const String genreFilterText = 'Жанр';
   static const String genreTitleFilterText = 'Выберите жанры';
   static const String studioTitleFilterText = 'Выберите киностудии';
   static const String studioFilterText = 'Киностудии';
+  static const String countryFilterText = 'Страна';
+
 
   static const List<Item> items = <Item>[
     Item(Constants.profileMenuText,Icon(Icons.person)),

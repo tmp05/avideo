@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:avideo/models/enums/country.dart';
 import 'package:avideo/models/enums/genre.dart';
 import 'package:avideo/models/enums/studios.dart';
 import 'package:http/http.dart' as http;
@@ -38,14 +39,26 @@ class AtotoApi {
     int maxYear,
     List<Genre> genreList,
     List<Studios> studiosList,
+    List<Country> countryList,
+    String query
   }) async {
     String sortId = sort != null ? sort.id : '';
     Map<String, dynamic> data = {
       'section': [section],
-      'sort': '$sortId',
-      'page': '$pageIndex'
+      'page': '$pageIndex',
+      'sort':'$sortId',
+      'query':query
     };
-    if (genreList != null) {
+
+    if (countryList!= null&&countryList.length>0) {
+      List<int> filterCountry= List();
+      countryList.forEach((element) {
+        filterCountry.add(element.id);
+      });
+      data.addAll({'country ': filterCountry});
+    }
+
+    if (genreList != null&&genreList.length>0) {
       List<int> filterGenre = List();
       genreList.forEach((element) {
         filterGenre.add(element.id);
@@ -53,13 +66,13 @@ class AtotoApi {
       data.addAll({'category': filterGenre});
     }
 
-    if (studiosList != null) {
+
+    if (studiosList != null&&studiosList.length>0) {
       List<int> filterStudio = List();
       studiosList.forEach((element) {
         filterStudio.add(element.value);
       });
       data.addAll({'studio': filterStudio});
-      //  data.addAll({'category': [genre.id]});
     }
 
     if (minYear != null || maxYear != null) {
@@ -162,13 +175,25 @@ class AtotoApi {
     Map<String, dynamic> data = {
       'section': [section],
     };
-    print('in movieStudios section is '+section);
     var body = json.encode(data);
     final String response = await _getHttpRequest(
         'https://atoto.ru/api/getStudios', 'post',
         body: body);
     var decodedResponse = json.decode(response);
     StudiosList listData = StudiosList.fromJSON(decodedResponse['data']);
+    return listData;
+  }
+
+  Future<CountryList> movieCountries(String section) async {
+    Map<String, dynamic> data = {
+      'section': [section],
+    };
+    var body = json.encode(data);
+    final String response = await _getHttpRequest(
+        'https://atoto.ru/api/getCountries', 'post',
+        body: body);
+    var decodedResponse = json.decode(response);
+    CountryList listData = CountryList.fromJSON(decodedResponse['data']);
     return listData;
   }
 

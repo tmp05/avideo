@@ -1,4 +1,5 @@
 import 'package:avideo/models/filters.dart';
+import 'package:avideo/widgets/filters/adds.dart';
 import 'package:flutter/material.dart';
 import 'package:avideo/blocs/bloc_provider.dart';
 import 'package:avideo/blocs/movie_catalog_bloc.dart';
@@ -17,13 +18,7 @@ class FiltersSummary extends StatelessWidget {
     MovieFilters currentFilter= MovieFilters();
 
     movieBloc.outFilters.listen((MovieFilters filters){
-      currentFilter =  MovieFilters(
-          minReleaseDate: filters.minReleaseDate,
-          maxReleaseDate: filters.maxReleaseDate,
-          sort: filters.sort,
-          genre: filters.genre,
-          studio: filters.studio
-          );
+      currentFilter = Adds().copyFilter(filters);
     });
 
     return       Wrap(

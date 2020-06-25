@@ -4,6 +4,7 @@ import 'package:avideo/models/filters.dart';
 import 'package:flutter/material.dart';
 
 import '../../constants.dart';
+import 'adds.dart';
 
 class SortItemWidget extends StatelessWidget {
   const SortItemWidget({
@@ -20,15 +21,7 @@ class SortItemWidget extends StatelessWidget {
         stream: movieBloc.outFilters,
         builder: (BuildContext context, AsyncSnapshot<MovieFilters> snapshot) {
           if (snapshot.data != null)
-            _currentFilter = MovieFilters(
-              minReleaseDate: snapshot.data.minReleaseDate,
-              maxReleaseDate: snapshot.data.maxReleaseDate,
-              genre: snapshot.data.genre,
-              year: snapshot.data.year,
-              country: snapshot.data.country,
-              studio: snapshot.data.studio,
-              sort: snapshot.data.sort,
-            );
+            _currentFilter = Adds().copyFilter(snapshot.data);
           return DropdownButton<SortItem>(
             onChanged: (SortItem value) {
               if (_currentFilter.sort != value) {

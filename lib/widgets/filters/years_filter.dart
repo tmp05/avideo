@@ -1,5 +1,6 @@
 import 'package:avideo/blocs/movie_catalog_bloc.dart';
 import 'package:avideo/models/filters.dart';
+import 'package:avideo/widgets/filters/adds.dart';
 import 'package:flutter/material.dart';
 
 import '../../constants.dart';
@@ -29,7 +30,7 @@ class YearFilterState extends State<YearFilter> {
     for (int i = yearNow; i > yearNow - 5; i--) {
       lastYearsList.add(i.toString());
     }
-    ;
+
     super.initState();
   }
 
@@ -48,15 +49,17 @@ class YearFilterState extends State<YearFilter> {
         stream: widget.movieBloc.outFilters,
         builder: (BuildContext context, AsyncSnapshot<MovieFilters> snapshot) {
           if (snapshot.data != null)
-            _currentFilter = MovieFilters(
-              minReleaseDate: snapshot.data.minReleaseDate,
-              maxReleaseDate: snapshot.data.maxReleaseDate,
-              genre: snapshot.data.genre,
-              year: snapshot.data.year,
-              country: snapshot.data.country,
-              studio: snapshot.data.studio,
-              sort: snapshot.data.sort,
-            );
+            _currentFilter = Adds().copyFilter(snapshot.data);
+
+          if (_currentFilter != null &&
+              _currentFilter.minReleaseDate != null &&
+              _currentFilter.maxReleaseDate != null) {
+            yearText = _currentFilter.minReleaseDate.toString() +
+                ' - ' +
+                _currentFilter.maxReleaseDate.toString();
+          }
+
+
           _values = RangeValues(
               _currentFilter == null || _currentFilter.minReleaseDate == null
                   ? 1910.0
@@ -64,16 +67,33 @@ class YearFilterState extends State<YearFilter> {
               _currentFilter == null || _currentFilter.maxReleaseDate == null
                   ? yearNow.toDouble()
                   : _currentFilter.maxReleaseDate.toDouble());
+
           return Column(
               mainAxisAlignment: MainAxisAlignment.start,
               crossAxisAlignment: CrossAxisAlignment.start,
               children: <Widget>[
                 Row(
                   children: <Widget>[
-                    Text(
-                      yearText,
-                      style: Constants.StyleFilterText,
-                    ),
+                    Container(
+                        decoration: new BoxDecoration(
+                          color: Constants.lightBlueColor,
+                          borderRadius: new BorderRadius.only(
+                              topRight: Radius.circular(20.0),
+                              bottomRight: Radius.circular(20.0)),
+                          border: new Border.all(
+                              color: Color.fromRGBO(0, 0, 0, 0.0)),
+                        ),
+                        child: Chip(
+                          labelPadding: EdgeInsets.all(2.0),
+                          shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.only(
+                                  topRight: Radius.circular(20),
+                                  bottomRight: Radius.circular(20))),
+                          label: Text(
+                            yearText,
+                            style: Constants.StyleFilterText,
+                          ),
+                        )),
                     InkWell(
                         child: const Icon(Icons.clear,
                             color: Constants.darkBlueColor),
